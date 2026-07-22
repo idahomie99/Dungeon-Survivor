@@ -1,0 +1,111 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+body { background-color: #050505; display: flex; justify-content: center; align-items: center; height: 100vh; }
+#game-container { width: 100%; max-width: 400px; height: 100%; max-height: 800px; background-color: #111; color: #eee; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.8); position: relative; overflow: hidden; }
+
+.screen-container { position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#0a0a0a; z-index:50; }
+.game-logo { font-size: 28px; font-weight: 800; color: #e53935; letter-spacing: 3px; margin-bottom: 60px; text-shadow: 0 0 20px rgba(229, 57, 53, 0.6); text-align: center; line-height: 1.3; }
+.tap-to-start { font-size: 15px; font-weight: bold; color: #ccc; letter-spacing: 2px; cursor: pointer; animation: blink 1.5s infinite; padding: 20px; }
+
+/* 💡 구글 로그인 버튼 스타일 */
+.google-btn { background-color: #ffffff; color: #444; border: 1px solid #ddd; border-radius: 8px; padding: 14px 24px; font-size: 15px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; width: 80%; max-width: 280px; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+.google-btn:hover { background-color: #f1f1f1; }
+.google-btn svg { width: 22px; height: 22px; }
+
+.login-notice { font-size: 11px; color: #555; margin-top: 20px; text-align: center; width: 80%; line-height: 1.5; }
+
+#game-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; font-size: 14px; font-weight: 600; letter-spacing: 2px; color: #888; background-color: #0a0a0a; border-bottom: 1px solid #222; }
+#guide-btn { background: #222; border: 1px solid #444; color: #ffc107; font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer; letter-spacing: 0px; }
+#guide-btn:hover { background: #333; }
+
+#visual-area { flex: 3; display: flex; flex-direction: column; border-bottom: 1px solid #222; position: relative; }
+#scene-image { flex: 1; display: flex; justify-content: center; align-items: center; background-color: #181818; color: #555; font-weight: 300; letter-spacing: 1px; }
+#scene-text { padding: 16px 20px; font-size: 13px; text-align: center; line-height: 1.6; color: #bbb; background-color: #111; }
+
+#dungeon-time-hud { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.7); border: 1px solid #444; border-radius: 6px; padding: 6px 10px; z-index: 10; display: flex; flex-direction: column; gap: 4px; }
+.dt-bar-bg { width: 100px; height: 4px; background: #222; border-radius: 2px; }
+#dt-bar { height: 100%; background: #00e5ff; border-radius: 2px; transition: width 0.3s; }
+#dt-text { font-size: 11px; font-weight: bold; color: #eee; }
+
+#exp-hud { display: flex; align-items: center; padding: 8px 24px; gap: 8px; background: #0f0f0f; border-bottom: 1px solid #222; }
+.exp-bar-bg { flex: 1; height: 4px; background: #222; border-radius: 2px; overflow: hidden; }
+#exp-bar { height: 100%; background: #4caf50; width: 0%; transition: width 0.3s; }
+#exp-text { font-size: 11px; color: #aaa; width: 80px; text-align: right; font-weight: 600; }
+#monster-sprite { width: 100px; height: 100px; margin: 0 auto 12px auto; display: flex; justify-content: center; align-items: center; }
+.monster-img { width: 100%; height: 100%; image-rendering: pixelated; }
+
+#minimap-wrapper { display: flex; justify-content: center; margin-bottom: 12px; }
+.minimap { display: grid; grid-template-columns: repeat(3, 24px); gap: 3px; background: #000; padding: 4px; border: 1px solid #333; border-radius: 4px; }
+.mm-cell { width: 24px; height: 24px; background-color: #1a1a1a; border-radius: 2px; transition: all 0.3s ease; }
+.mm-visited { background-color: #555; }
+.mm-current { background-color: #e53935; box-shadow: 0 0 8px #e53935; border: 1px solid #fff; z-index:2; }
+.mm-target { background-color: #ff9800; box-shadow: 0 0 8px #ff9800; border: 1px solid #fff; animation: blink 1s infinite; }
+.mm-monument { background-color: #00e5ff; box-shadow: 0 0 8px #00e5ff; border: 1px solid #fff; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+#hud-area { display: flex; flex-direction: column; overflow-y: auto; max-height: 120px; background-color: #0f0f0f; border-bottom: 1px solid #222; padding: 8px 12px; gap: 6px; }
+.party-member { background: #151515; border: 1px solid #222; border-radius: 4px; padding: 6px 12px; transition: all 0.2s; }
+.pm-header { display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; color: #ccc; margin-bottom: 4px; }
+.stat-row { display: flex; align-items: center; width: 100%; margin-top: 2px; }
+.label { width: 40px; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; color: #777; }
+.bar-bg { flex: 1; height: 4px; background-color: #222; border-radius: 2px; margin: 0 8px; position: relative; overflow: hidden; }
+.bar { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
+.hp-bar { background: linear-gradient(90deg, #8b0000, #e53935); }
+.mp-bar { background: linear-gradient(90deg, #0d47a1, #1e88e5); }
+.hunger-bar { background: linear-gradient(90deg, #e65100, #fb8c00); }
+.fatigue-bar { background: linear-gradient(90deg, #4a148c, #8e24aa); }
+.value-text { width: 40px; text-align: right; font-size: 10px; color: #aaa; font-weight: 500; }
+
+#action-area { flex: 4; padding: 20px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; background-color: #111; }
+.btn { background-color: transparent; color: #ccc; border: 1px solid #333; padding: 14px; border-radius: 6px; font-size: 13px; font-weight: 400; cursor: pointer; transition: all 0.2s ease; text-align: center; }
+.btn:hover { background-color: #eee; color: #111; border-color: #eee; }
+.action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; }
+.icon-btn { background-color: transparent; border: 1px solid #333; border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; color: #999; }
+.icon-btn:hover { background-color: #222; border-color: #666; color: #fff; }
+.icon-btn svg { width: 28px; height: 28px; margin-bottom: 6px; fill: currentColor; }
+.icon-btn span { font-size: 11px; font-weight: 600; text-align: center;}
+
+.compass-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
+.compass-btn { background-color: transparent; color: #bbb; border: 1px solid #333; padding: 12px 0; border-radius: 6px; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.compass-btn:hover { background-color: #222; color: #fff; border-color: #666; }
+.compass-btn svg { width: 24px; height: 24px; fill: currentColor; }
+.compass-empty { display: flex; align-items: center; justify-content: center; font-size: 11px; color: #555; background: #151515; border-radius: 6px; border: 1px dashed #333; }
+.compass-current { border-color: #e53935; color: #e53935; font-weight: bold; background: #221111; }
+
+.inv-item { display: flex; flex-direction: column; background: #1a1a1a; padding: 10px; border: 1px solid #333; border-radius: 6px; gap: 6px; }
+.inv-header { display: flex; justify-content: space-between; align-items: center; }
+.inv-info { display: flex; align-items: center; gap: 8px; color: #ddd; font-size: 12px; font-weight: 500; }
+.inv-info svg { width: 18px; height: 18px; fill: currentColor; }
+.inv-btn { padding: 6px 12px; font-size: 11px; border-color: #555; }
+.inv-stats { font-size: 10px; color: #888; background: #111; padding: 6px; border-radius: 4px; }
+.stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; font-size: 11px; color: #aaa; background: #151515; padding: 10px; border-radius: 6px; border: 1px solid #333; margin-bottom: 10px; }
+.stat-val { color: #fff; font-weight: bold; }
+
+#creation-screen { display: flex; flex-direction: column; flex: 1; padding: 24px; background-color: #111; overflow-y: auto; }
+.screen-title { text-align: center; font-size: 15px; color: #eee; margin-bottom: 24px; font-weight: 600; }
+.class-grid { display: flex; flex-direction: column; gap: 12px; }
+.class-card { display: flex; background-color: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 12px; cursor: pointer; align-items: center; }
+.class-card:hover { background-color: #2a2a2a; border-color: #666; }
+.class-sprite { width: 50px; height: 50px; background-color: transparent; border: none; margin-right: 12px; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+.class-img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
+
+.class-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.class-name { font-size: 14px; font-weight: bold; color: #fff; }
+.class-desc { font-size: 11px; color: #888; line-height: 1.4; }
+#main-screen { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.hidden { display: none !important; }
+
+#game-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
+.modal-box { background: #151515; border: 1px solid #444; border-radius: 8px; width: 100%; max-width: 320px; padding: 24px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 10px 30px rgba(0,0,0,1); text-align: center; max-height: 80vh; overflow-y: auto;}
+#modal-text { font-size: 13px; color: #eee; line-height: 1.6; white-space: pre-wrap; word-break: keep-all; text-align: left; }
+#modal-btn-area { display: flex; flex-direction: column; gap: 8px; }
+.modal-btn { background: #333; color: #fff; border: 1px solid #555; padding: 12px; border-radius: 6px; font-size: 13px; cursor: pointer; transition: 0.2s; width: 100%; }
+.modal-btn:hover { background: #eee; color: #111; }
+
+#fade-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background:#050505; z-index:999; opacity:0; pointer-events:none; transition: opacity 0.3s ease; }
+.shake { animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both; }
+@keyframes shake { 
+    10%, 90% { transform: translate3d(-2px, -1px, 0); } 
+    20%, 80% { transform: translate3d(2px, 1px, 0); } 
+    30%, 50%, 70% { transform: translate3d(-4px, -2px, 0); } 
+    40%, 60% { transform: translate3d(4px, 2px, 0); } 
+}
