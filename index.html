@@ -33,18 +33,16 @@
             <p class="login-notice">※ Firebase 클라우드 서버에 데이터가 자동 저장됩니다.</p>
         </div>
 
-        <!-- 💡 동적으로 버튼과 문구가 바뀔 세이브 확인 화면 -->
         <div id="save-check-screen" class="screen-container hidden">
             <h1 class="game-logo" style="margin-bottom: 20px;">DUNGEON SURVIVOR</h1>
             <p id="save-status-text" style="color:#aaa; margin-bottom:40px; font-size:13px;">데이터를 확인 중입니다...</p>
             <div id="save-action-btns" style="display:flex; flex-direction:column; gap:12px; width:60%;">
-                <!-- 버튼이 자바스크립트로 들어갑니다 -->
             </div>
         </div>
 
         <header id="game-header" class="hidden">
             <span>DUNGEON SURVIVOR</span>
-            <button id="guide-btn" onclick="showTutorial()" class="hidden">❓ 가이드</button>
+            <button id="guide-btn" onclick="showDungeonGuide()" class="hidden">❓ 던전가이드</button>
         </header>
         
         <div id="creation-screen" class="hidden">
@@ -54,10 +52,20 @@
 
         <div id="main-screen" class="hidden">
             <div id="visual-area">
-                <div id="dungeon-time-hud" class="hidden">
-                    <span id="dt-text">남은 기간: 7일</span>
-                    <div class="dt-bar-bg"><div id="dt-bar" style="width: 100%;"></div></div>
+                <!-- 💡 상단 HUD들 -->
+                <div id="dungeon-time-hud" class="hidden" style="position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.7); border: 1px solid #444; border-radius: 6px; padding: 6px 10px; z-index: 10; display: flex; flex-direction: column; gap: 4px;">
+                    <span id="dt-text" style="font-size: 11px; font-weight: bold; color: #eee;">남은 기간: 7일</span>
+                    <div style="width: 100px; height: 4px; background: #222; border-radius: 2px;"><div id="dt-bar" style="height: 100%; background: #00e5ff; border-radius: 2px; transition: width 0.3s;"></div></div>
                 </div>
+                
+                <div id="dungeon-turn-hud" class="hidden" style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.7); border: 1px solid #444; border-radius: 6px; padding: 6px 10px; z-index: 10;">
+                    <span id="dt-turn-text" style="font-size: 11px; font-weight: bold; color: #eee;">남은 턴: 20 / 20</span>
+                </div>
+
+                <div id="dungeon-kill-hud" class="hidden" style="position: absolute; top: 50px; left: 12px; background: rgba(0,0,0,0.7); border: 1px solid #444; border-radius: 6px; padding: 6px 10px; z-index: 10;">
+                    <span id="dt-kill-text" style="font-size: 11px; font-weight: bold; color: #ff9800;">⚔️ 처치: 0</span>
+                </div>
+
                 <div id="scene-image">Graphic Area</div>
                 <p id="scene-text">마을 광장에 서 있습니다.</p>
             </div>
