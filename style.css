@@ -12,34 +12,39 @@ body { background-color: #050505; display: flex; justify-content: center; align-
 
 .login-notice { font-size: 11px; color: #555; margin-top: 20px; text-align: center; width: 80%; line-height: 1.5; }
 
-#game-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; font-size: 14px; font-weight: 600; letter-spacing: 2px; color: #888; background-color: #0a0a0a; border-bottom: 1px solid #222; }
+#game-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; font-size: 14px; font-weight: 600; letter-spacing: 2px; color: #888; background-color: #0a0a0a; border-bottom: 1px solid #222; z-index: 30; }
 #guide-btn { background: #222; border: 1px solid #444; color: #ffc107; font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer; letter-spacing: 0px; }
 #guide-btn:hover { background: #333; }
 
-#visual-area { flex: 3; display: flex; flex-direction: column; border-bottom: 1px solid #222; position: relative; overflow: hidden; }
-#scene-image { flex: 1; display: flex; justify-content: center; align-items: center; background-color: #181818; color: #555; font-weight: 300; letter-spacing: 1px; }
-#scene-text { padding: 16px 20px; font-size: 13px; text-align: center; line-height: 1.6; color: #bbb; background-color: #111; z-index: 5; }
+#visual-area { flex: 3; display: flex; flex-direction: column; border-bottom: 1px solid #222; position: relative; overflow: hidden; background-color:#111; }
+/* 💡 자바스크립트에서 이미지를 세팅하므로 background-image 제거, 투명도 조절 */
+#dungeon-bg { position: absolute; top:0; left:0; width:100%; height:100%; background-size: cover; background-position: center; opacity: 0.4; z-index: 1; transition: background-image 0.5s ease; }
+#scene-text { flex: 1; padding: 40px 20px 20px 20px; font-size: 13px; text-align: center; line-height: 1.6; color: #eee; z-index: 5; display:flex; flex-direction:column; justify-content:center; }
 
-/* 💡 6. 장비 슬롯 UI (Paper Doll Grid) */
-#equip-ui-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(10,10,10,0.98); z-index:20; padding:15px; overflow-y:auto; display:flex; justify-content:center; align-items:center; }
-#paper-doll { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-areas: "weap helm neck" "glov ches cape" "rin1 pant rin3" "rin2 shoe rin4" "brac ess1 ess2"; gap: 6px; width: 100%; max-width: 320px; }
-.eq-slot { background:#151515; border:1px dashed #444; border-radius:6px; padding:10px 2px; text-align:center; font-size:10px; color:#666; cursor:pointer; display:flex; flex-direction:column; justify-content:center; gap:4px; transition:0.2s; word-break: keep-all; height: 50px; }
-.eq-slot:hover { background:#222; border-color:#888; }
-.eq-slot.filled { border:1px solid #ffd54f; color:#eee; background:#221b00; }
+#cp-toast { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); padding: 8px 16px; font-size: 18px; font-weight: bold; background: rgba(0,0,0,0.8); border: 2px solid; border-radius: 8px; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; text-shadow: 0 0 10px currentColor; }
+#cp-toast.show { opacity: 1; }
+
+#equip-ui-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(10,10,10,0.98); z-index:20; padding:15px; display:flex; flex-direction:column; align-items:center; overflow-y:auto;}
+#paper-doll { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-areas: "weap helm neck" "glov ches cape" "rin1 pant rin2" ". shoe ."; gap: 6px; width: 100%; max-width: 280px; position:relative; padding-top: 10px; background: url('image/silhouette.png') no-repeat center center; background-size: 70%; }
+.eq-slot { background:rgba(20,20,20,0.85); border:1px dashed #444; border-radius:6px; padding:6px 2px; text-align:center; font-size:10px; color:#666; cursor:pointer; display:flex; flex-direction:column; justify-content:center; gap:4px; transition:0.2s; word-break: keep-all; height: 48px; }
+.eq-slot:hover { background:rgba(40,40,40,0.95); border-color:#888; }
+.eq-slot.filled { border:1px solid #ffd54f; color:#eee; background:rgba(34,27,0,0.9); }
 .eq-slot.es-slot { border-style: dashed; border-color: #00e5ff; }
-.eq-slot.es-slot.filled { border-style: solid; border-color: #00e5ff; background:#001d22; }
-.eq-slot-title { font-weight:bold; font-size:10px; opacity:0.8; }
+.eq-slot.es-slot.filled { border-style: solid; border-color: #00e5ff; background:rgba(0,29,34,0.9); }
+.eq-slot-title { font-weight:bold; font-size:9px; opacity:0.8; }
+.ess-container { display: flex; gap: 8px; margin-top: 15px; width: 100%; max-width: 280px; justify-content: center; }
+.ess-container .eq-slot { width: 45%; }
 
-#exp-hud { display: flex; align-items: center; padding: 8px 24px; gap: 8px; background: #0f0f0f; border-bottom: 1px solid #222; }
+#exp-hud { display: flex; align-items: center; padding: 8px 24px; gap: 8px; background: #0f0f0f; border-bottom: 1px solid #222; z-index:10; }
 .exp-bar-bg { flex: 1; height: 4px; background: #222; border-radius: 2px; overflow: hidden; }
 #exp-bar { height: 100%; background: #4caf50; width: 0%; transition: width 0.3s; }
 #exp-text { font-size: 11px; color: #aaa; width: 80px; text-align: right; font-weight: 600; }
-#monster-sprite { width: 100px; height: 100px; margin: 0 auto 12px auto; display: flex; justify-content: center; align-items: center; }
-.monster-img { width: 100%; height: 100%; image-rendering: pixelated; }
+#monster-sprite { width: 120px; height: 120px; margin: 0 auto 12px auto; display: flex; justify-content: center; align-items: center; }
+.monster-img { width: 100%; height: 100%; object-fit:contain; image-rendering: pixelated; filter: drop-shadow(0px 10px 5px rgba(0,0,0,0.5)); }
 
 #minimap-wrapper { display: flex; justify-content: center; margin-bottom: 12px; }
-.minimap { display: grid; grid-template-columns: repeat(3, 24px); gap: 3px; background: #000; padding: 4px; border: 1px solid #333; border-radius: 4px; }
-.mm-cell { width: 24px; height: 24px; background-color: #1a1a1a; border-radius: 2px; transition: all 0.3s ease; }
+.minimap { display: grid; grid-template-columns: repeat(3, 28px); gap: 3px; background: rgba(0,0,0,0.5); padding: 6px; border: 1px solid #333; border-radius: 4px; }
+.mm-cell { width: 28px; height: 28px; background-color: rgba(26,26,26,0.8); border-radius: 2px; transition: all 0.3s ease; }
 .mm-visited { background-color: #555; }
 .mm-current { background-color: #e53935; box-shadow: 0 0 8px #e53935; border: 1px solid #fff; z-index:2; }
 .mm-target { background-color: #ff9800; box-shadow: 0 0 8px #ff9800; border: 1px solid #fff; animation: blink 1s infinite; }
@@ -47,10 +52,16 @@ body { background-color: #050505; display: flex; justify-content: center; align-
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
 #hud-area { display: grid; overflow-y: auto; max-height: 160px; background-color: #0f0f0f; border-bottom: 1px solid #222; padding: 6px 8px; gap: 6px; }
-.party-member { background: #151515; border: 1px solid #222; border-radius: 6px; padding: 8px; transition: all 0.2s; }
-.pm-header { display: flex; justify-content: space-between; font-size: 10px; font-weight: bold; color: #ccc; margin-bottom: 6px; }
-.stat-row { display: flex; align-items: center; width: 100%; margin-top: 3px; }
-.label { width: 38px; font-size: 9px; font-weight: 600; letter-spacing: -0.5px; color: #777; }
+.party-member { background: #151515; border: 1px solid #222; border-radius: 6px; padding: 6px; transition: all 0.2s; display:flex; flex-direction:column; gap:4px; }
+.pm-header { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+.pm-char-icon { width: 24px; height: 24px; border: 1px solid #444; border-radius: 4px; object-fit: contain; background: #222; }
+.pm-info { flex: 1; display:flex; flex-direction:column; justify-content:center; line-height: 1.2; }
+.pm-name { font-size: 10px; font-weight: bold; color: #ccc; }
+.pm-sub { font-size: 9px; color: #888; }
+.pm-cp { font-size: 10px; font-weight: bold; color: #ff9800; text-align: right; }
+
+.stat-row { display: flex; align-items: center; width: 100%; }
+.label { width: 34px; font-size: 9px; font-weight: 600; letter-spacing: -0.5px; color: #777; }
 .bar-bg { flex: 1; height: 4px; background-color: #222; border-radius: 2px; margin: 0 4px; position: relative; overflow: hidden; }
 .bar { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
 .hp-bar { background: linear-gradient(90deg, #8b0000, #e53935); }
@@ -59,16 +70,17 @@ body { background-color: #050505; display: flex; justify-content: center; align-
 .fatigue-bar { background: linear-gradient(90deg, #4a148c, #8e24aa); }
 .value-text { width: 32px; text-align: right; font-size: 9px; color: #aaa; font-weight: 500; }
 
-#action-area { flex: 4; padding: 20px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; background-color: #111; }
+#action-area { flex: 4; padding: 15px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; background-color: #111; }
 .btn { background-color: transparent; color: #ccc; border: 1px solid #333; padding: 14px; border-radius: 6px; font-size: 13px; font-weight: 400; cursor: pointer; transition: all 0.2s ease; text-align: center; }
 .btn:hover { background-color: #eee; color: #111; border-color: #eee; }
-.action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; }
-.icon-btn { background-color: transparent; border: 1px solid #333; border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; color: #999; }
+.action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; }
+.icon-btn { background-color: transparent; border: 1px solid #333; border-radius: 8px; padding: 10px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; color: #999; }
 .icon-btn:hover { background-color: #222; border-color: #666; color: #fff; }
-.icon-btn svg { width: 28px; height: 28px; margin-bottom: 6px; fill: currentColor; }
-.icon-btn span { font-size: 11px; font-weight: 600; text-align: center;}
+.icon-btn.auto-active { background-color: rgba(76, 175, 80, 0.2); border-color: #4caf50; color: #4caf50; }
+.icon-btn svg { width: 24px; height: 24px; margin-bottom: 6px; fill: currentColor; }
+.icon-btn span { font-size: 10px; font-weight: 600; text-align: center;}
 
-.compass-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
+.compass-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; margin: 0 auto; max-width: 250px;}
 .compass-btn { background-color: transparent; color: #bbb; border: 1px solid #333; padding: 12px 0; border-radius: 6px; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
 .compass-btn:hover { background-color: #222; color: #fff; border-color: #666; }
 .compass-btn svg { width: 24px; height: 24px; fill: currentColor; }
@@ -82,7 +94,7 @@ body { background-color: #050505; display: flex; justify-content: center; align-
 .inv-btn { padding: 6px 12px; font-size: 11px; border-color: #555; }
 .inv-stats { font-size: 10px; color: #888; background: #111; padding: 6px; border-radius: 4px; }
 
-#creation-screen { display: flex; flex-direction: column; flex: 1; padding: 24px; background-color: #111; overflow-y: auto; }
+#creation-screen { display: flex; flex-direction: column; flex: 1; padding: 24px; background-color: #111; overflow-y: auto; z-index:30; }
 .screen-title { text-align: center; font-size: 15px; color: #eee; margin-bottom: 24px; font-weight: 600; }
 .class-grid { display: flex; flex-direction: column; gap: 12px; }
 .class-card { display: flex; background-color: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 12px; cursor: pointer; align-items: center; }
@@ -93,7 +105,6 @@ body { background-color: #050505; display: flex; justify-content: center; align-
 .class-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
 .class-name { font-size: 14px; font-weight: bold; color: #fff; }
 .class-desc { font-size: 11px; color: #888; line-height: 1.4; }
-#main-screen { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
 .hidden { display: none !important; }
 
 #game-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
