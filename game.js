@@ -24,6 +24,7 @@ const baseClasses = {
     '소환사': { img: 'image/summoner.png', desc: '소환수의 힘을 빌려 전투를 지휘하는 지휘관' }
 };
 
+// 💡 1. 회복법사 홀리에로우 타겟 힐 기능 적용 (isHolyArrow: true)
 const jobData = {
     '바바리안(탱커)': { img: 'image/barbarian.png', desc: '강력한 방어력을 갖춘 전사', atk:15, matk:5, str:20, dex:5, luk:10, int:5, maxHp:220, maxMp:40, def:25, skills: [{n:'도발', rank:1, mp:15, mult:1.5}, {n:'철벽 방어', rank:2, mp:25, mult:2.0}, {n:'대지 가르기', rank:3, mp:45, mult:2.5}] },
     '바바리안(브루저)': { img: 'image/barbarian.png', desc: '공격과 방어의 밸런스', atk:20, matk:5, str:20, dex:10, luk:10, int:5, maxHp:180, maxMp:40, def:15, skills: [{n:'분쇄', rank:1, mp:20, mult:1.6}, {n:'대지 강타', rank:2, mp:35, mult:2.3}, {n:'돌진', rank:3, mp:55, mult:3.1}] },
@@ -31,7 +32,7 @@ const jobData = {
     '엘프': { img: 'image/elf.png', desc: '빠른 몸놀림의 궁수', atk:20, matk:10, str:15, dex:25, luk:10, int:10, maxHp:110, maxMp:60, def:5, skills: [{n:'연사', rank:1, mp:20, mult:1.5}, {n:'관통 화살', rank:2, mp:35, mult:2.2}, {n:'폭풍의 시위', rank:3, mp:55, mult:3.0}] },
     '드워프': { img: 'image/dwarf.png', desc: '철벽의 수호자', atk:22, matk:10, str:15, dex:10, luk:10, int:10, maxHp:220, maxMp:50, def:20, skills: [{n:'방패 치기', rank:1, mp:20, mult:1.5}, {n:'지진', rank:2, mp:35, mult:2.2}, {n:'철벽의 일격', rank:3, mp:55, mult:3.0}] },
     '마법사(전투마법)': { img: 'image/magician.png', desc: '파괴적인 마법 공격', atk:10, matk:30, str:5, dex:10, luk:10, int:25, maxHp:80, maxMp:180, def:5, skills: [{n:'파이어볼', rank:1, mp:30, mult:1.8}, {n:'라이트닝', rank:2, mp:50, mult:2.6}, {n:'메테오', rank:3, mp:80, mult:4.0}] },
-    '마법사(회복마법)': { img: 'image/magician.png', desc: '아군을 치유하는 마법사', atk:5, matk:20, str:5, dex:10, luk:15, int:20, maxHp:90, maxMp:200, def:5, skills: [{n:'홀리 애로우', rank:1, mp:20, mult:1.2}, {n:'치유의 빛', rank:2, mp:45, mult:2.5, isHeal:true}, {n:'성역', rank:3, mp:70, mult:4.0, isHeal:true}] },
+    '마법사(회복마법)': { img: 'image/magician.png', desc: '아군을 치유하는 마법사', atk:5, matk:20, str:5, dex:10, luk:15, int:20, maxHp:90, maxMp:200, def:5, skills: [{n:'홀리 애로우', rank:1, mp:25, mult:1.1, isHolyArrow:true}, {n:'치유의 빛', rank:2, mp:45, mult:2.5, isHeal:true}, {n:'성역', rank:3, mp:70, mult:4.0, isHeal:true}] },
     '도적': { img: 'image/assassin.png', desc: '치명적인 한 방', atk:22, matk:10, str:10, dex:20, luk:25, int:10, maxHp:90, maxMp:50, def:5, skills: [{n:'기습', rank:1, mp:20, mult:1.5}, {n:'그림자 베기', rank:2, mp:35, mult:2.2}, {n:'암살', rank:3, mp:55, mult:3.0}] },
     '소환사': { img: 'image/summoner.png', desc: '마수 소환', atk:10, matk:20, str:10, dex:15, luk:10, int:25, maxHp:100, maxMp:120, def:5, skills: [{n:'마력탄', rank:1, mp:25, mult:1.5}, {n:'정령의 분노', rank:2, mp:45, mult:2.3}, {n:'고대 마수 소환', rank:3, mp:75, mult:3.3}] }
 };
@@ -41,7 +42,7 @@ let player = {
     rank: 1, level: 1, exp: 0, maxExp: 150, hunger: 100, maxHunger: 100, fatigue: 0, prestige: 0,
     inDungeon: false, dungeonDay: 1, maxDungeonDay: 7, floor: 1, turn: 0, maxTurn: 20, dungeonKills: 0, dungeonGuideSeen: false,
     pos: {x: 1, y: 1}, visited: ['1,1'], targetPos: null, stepsLeft: 0,
-    bossKills: {}, mobKills: {}, 
+    mobKills: {}, 
     items: { food: 5, hpPotion: 3, mpPotion: 2, ore: 0 }, equipList: [], essenceList: [],
     equipped: { "모자": null, "상의": null, "하의": null, "신발": null, "장갑": null, "무기": null, "망토": null, "팔찌": null, "목걸이": null, "반지": [], "정수": [] },
     warehouse: { items: { food: 0, hpPotion: 0, mpPotion: 0, ore: 0 }, equipList: [], essenceList: [] },
@@ -59,7 +60,6 @@ const floorBosses = { 1: "심연의 포식자, 그라둠", 2: "불사의 군신,
 const monsterImgs = { "동굴 슬라임": "image/caveslime.png", "동굴 박쥐": "image/cavebat.png", "지하 고블린": "image/undergroundgoblin.png", "굴착기 고블린": "image/minergoblin.png", "스켈레톤 워리어": "image/skeletonwarrior.png" };
 const mapGrid = [[{n:'북서'}, {n:'북'}, {n:'북동'}],[{n:'서'}, {n:'중앙'}, {n:'동'}],[{n:'남서'}, {n:'남'}, {n:'남동'}]];
 
-// 💡 8. 돌아가기(home) 아이콘 추가
 const icons = {
     dungeon: `<svg viewBox="0 0 24 24"><path d="M19 19V4h-4V3H9v1H5v15H3v2h18v-2h-2zm-6 0h-2v-2h2v2zm0-4h-2v-2h2v2z"/></svg>`,
     work: `<svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.49-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>`,
@@ -82,9 +82,8 @@ const icons = {
 let guildRecruit = null;
 let currentEnemy = null; 
 let combatState = { turnIndex: 0 }; 
-let arenaState = { round: 16, fighters: [] }; // 💡 투기장 상태 저장 변수
+let arenaState = { round: 16, fighters: [] }; 
 
-// 구글 로그인 및 세이브
 function googleLogin() { auth.signInWithPopup(provider).then((result) => { currentUser = result.user; fadeTransition(() => { checkFirestoreSave(currentUser.uid); }); }).catch((error) => { alert("로그인에 실패했습니다: " + error.message); }); }
 
 function checkFirestoreSave(uid) {
@@ -159,37 +158,66 @@ function showMessage(msg, callback, buttons) {
 }
 function closeModal() { const modal = document.getElementById('game-modal'); if(modal) modal.classList.add('hidden'); }
 
-// 💡 7. HUD 동적 레이아웃 조절 (1명일 때와 2명 이상일 때)
+// 💡 4 & 9. 등급(Rank)별 스탯 폭증 (3배씩) 및 피로도 페널티 시스템
+function getTotalStats(memberIndex = 0) {
+    let member = player.party[memberIndex];
+    if(!member) return {maxHp:1, maxMp:1}; 
+    let s = { ...member };
+    
+    if (memberIndex === 0) {
+        for (let slot in player.equipped) {
+            if (slot === "반지") player.equipped["반지"].forEach(ring => { for (let st in ring.stats) s[st] += ring.stats[st]; });
+            else if (slot !== "정수" && player.equipped[slot]) { let eq = player.equipped[slot]; for (let st in eq.stats) s[st] += eq.stats[st]; }
+        }
+    }
+    
+    // 💡 4. 등급이 오를수록 3배씩 강력해지는 밸런스 공식
+    let rMult = Math.pow(3, member.rank - 1);
+    s.atk *= rMult; s.matk *= rMult; s.def *= rMult; 
+    s.str *= rMult; s.dex *= rMult; s.luk *= rMult; s.int *= rMult;
+    s.maxHp *= rMult; s.maxMp *= rMult;
+    
+    if (memberIndex === 0) {
+        let essenceBonus = 0; player.equipped["정수"].forEach(ess => { essenceBonus += (ess.tier * 0.01); });
+        if (essenceBonus > 0) {
+            s.atk = Math.floor(s.atk * (1 + essenceBonus)); s.matk = Math.floor(s.matk * (1 + essenceBonus));
+            s.def = Math.floor(s.def * (1 + essenceBonus)); s.maxHp = Math.floor(s.maxHp * (1 + essenceBonus)); s.maxMp = Math.floor(s.maxMp * (1 + essenceBonus));
+        }
+        // 💡 9. 피로도 100 달성 시 치명적인 스탯 페널티
+        if (player.fatigue >= 100) {
+            s.atk = Math.floor(s.atk * 0.5); s.matk = Math.floor(s.matk * 0.5); s.def = Math.floor(s.def * 0.5);
+        }
+    }
+    return s;
+}
+
 function updateAllStats() {
     if(!player.party || player.party.length === 0) return;
     
     let hudHtml = '';
     player.party.forEach((member, idx) => {
-        let maxHp = member.isPlayer ? getTotalStats().maxHp : member.maxHp; let maxMp = member.isPlayer ? getTotalStats().maxMp : member.maxMp;
-        let hpRatio = Math.max(0, Math.min(100, (member.hp / maxHp) * 100)); let mpRatio = Math.max(0, Math.min(100, (member.mp / maxMp) * 100));
+        let s = member.isPlayer ? getTotalStats(0) : getTotalStats(idx);
+        let hpRatio = Math.max(0, Math.min(100, (member.hp / s.maxHp) * 100)); let mpRatio = Math.max(0, Math.min(100, (member.mp / s.maxMp) * 100));
         let isDead = member.hp <= 0 ? ' (기절)' : '';
         
         hudHtml += `
             <div class="party-member" style="${member.hp <= 0 ? 'opacity:0.5;' : ''}">
                 <div class="pm-header"><span>${idx === 0 ? '[L] ' : ''}${member.name||member.job}${isDead}</span> <span>Lv.${member.level}</span></div>
-                <div class="stat-row"><span class="label">HP</span><div class="bar-bg"><div class="bar hp-bar" style="width:${hpRatio}%"></div></div><span class="value-text">${member.hp}/${maxHp}</span></div>
-                <div class="stat-row"><span class="label">MP</span><div class="bar-bg"><div class="bar mp-bar" style="width:${mpRatio}%"></div></div><span class="value-text">${member.mp}/${maxMp}</span></div>
+                <div class="stat-row"><span class="label">HP</span><div class="bar-bg"><div class="bar hp-bar" style="width:${hpRatio}%"></div></div><span class="value-text">${Math.floor(member.hp)}/${Math.floor(s.maxHp)}</span></div>
+                <div class="stat-row"><span class="label">MP</span><div class="bar-bg"><div class="bar mp-bar" style="width:${mpRatio}%"></div></div><span class="value-text">${Math.floor(member.mp)}/${Math.floor(s.maxMp)}</span></div>
         `;
         if(idx === 0) {
             let hunRatio = Math.max(0, Math.min(100, (player.hunger / 100) * 100)); let fatRatio = Math.max(0, Math.min(100, (player.fatigue / 100) * 100));
             hudHtml += `
                 <div class="stat-row"><span class="label" style="color:#fb8c00;">배고픔</span><div class="bar-bg"><div class="bar hunger-bar" style="width:${hunRatio}%"></div></div><span class="value-text">${player.hunger}</span></div>
-                <div class="stat-row"><span class="label" style="color:#8e24aa;">피로도</span><div class="bar-bg"><div class="bar fatigue-bar" style="width:${fatRatio}%"></div></div><span class="value-text">${player.fatigue}</span></div>
+                <div class="stat-row"><span class="label" style="color:${player.fatigue>=100?'#ff0000':'#8e24aa'};">피로도</span><div class="bar-bg"><div class="bar fatigue-bar" style="width:${fatRatio}%"></div></div><span class="value-text">${player.fatigue}</span></div>
             `;
         }
         hudHtml += `</div>`;
     });
     
     const hudArea = document.getElementById('hud-area'); 
-    if(hudArea) {
-        hudArea.style.gridTemplateColumns = player.party.length > 1 ? '1fr 1fr' : '1fr';
-        hudArea.innerHTML = hudHtml;
-    }
+    if(hudArea) { hudArea.style.gridTemplateColumns = player.party.length > 1 ? '1fr 1fr' : '1fr'; hudArea.innerHTML = hudHtml; }
     
     const expBar = document.getElementById('exp-bar'); if(expBar) expBar.style.width = `${(player.exp / player.maxExp) * 100}%`;
     const expText = document.getElementById('exp-text'); if(expText) expText.innerText = `Lv.${player.level} (${Math.floor(player.exp)}/${player.maxExp})`;
@@ -198,11 +226,11 @@ function updateAllStats() {
 
 function levelUp() {
     player.level++; player.exp -= player.maxExp; player.maxExp = Math.floor(player.maxExp * 2.2); 
-    player.party.forEach(p => {
+    player.party.forEach((p, idx) => {
         p.level = player.level;
         p.atk += 1; p.matk += 1; p.def += 1; p.str += 1; p.dex += 1; p.luk += 1; p.int += 1; 
         p.maxHp += 10; p.maxMp += 5;
-        if(p.isPlayer) { let ts = getTotalStats(); p.hp = ts.maxHp; p.mp = ts.maxMp; } else { p.hp = p.maxHp; p.mp = p.maxMp; }
+        let s = getTotalStats(idx); p.hp = s.maxHp; p.mp = s.maxMp;
     });
     player.fatigue = 0; updateAllStats();
 }
@@ -226,25 +254,6 @@ function passTime(days) {
         return true;
     }
     return false;
-}
-
-function getTotalStats() {
-    if(!player.party[0]) return {maxHp:1, maxMp:1}; 
-    let s = { ...player.party[0] };
-    for (let slot in player.equipped) {
-        if (slot === "반지") player.equipped["반지"].forEach(ring => { for (let st in ring.stats) s[st] += ring.stats[st]; });
-        else if (slot !== "정수" && player.equipped[slot]) { let eq = player.equipped[slot]; for (let st in eq.stats) s[st] += eq.stats[st]; }
-    }
-    let essenceBonus = 0; player.equipped["정수"].forEach(ess => { essenceBonus += (ess.tier * 0.01); });
-    
-    if (essenceBonus > 0) {
-        s.atk = Math.floor(s.atk * (1 + essenceBonus)); s.matk = Math.floor(s.matk * (1 + essenceBonus));
-        s.str = Math.floor(s.str * (1 + essenceBonus)); s.dex = Math.floor(s.dex * (1 + essenceBonus));
-        s.luk = Math.floor(s.luk * (1 + essenceBonus)); s.int = Math.floor(s.int * (1 + essenceBonus));
-        s.def = Math.floor(s.def * (1 + essenceBonus));
-        s.maxHp = Math.floor(s.maxHp * (1 + essenceBonus)); s.maxMp = Math.floor(s.maxMp * (1 + essenceBonus));
-    }
-    return s;
 }
 
 function showClassSelection() {
@@ -277,7 +286,7 @@ function selectClass(job, nickname) {
 }
 
 function showDungeonGuide() {
-    showMessage(`<div style="font-weight:bold; color:#ffd54f; font-size:15px; margin-bottom:12px; text-align:center;">[ 던전 가이드 ]</div>⚔️ <b>행동력 (턴)</b>: 전진할 때마다 1턴 소모. 밤(20턴)이 되면 자야 합니다.<br><br>🍖 <b>허기와 피로도</b>: 허기가 0일 때 잠을 자면 피로도가 크게 상승합니다! 피로도가 100이 되면 전투와 생존에 치명적인 페널티가 발생합니다.<br><br>💀 <b>사망 페널티</b>: 파티장이 기절하면 소모품 전부와 골드 절반을 잃습니다.<br><br>💎 <b>비석</b>: 층마다 다음 층으로 가는 비석이 숨겨져 있습니다.<br><br>💰 <b>주민 후원</b>: 사냥한 몬스터 5마리 단위로 귀환 시 마을 주민들이 후원금을 줍니다.`);
+    showMessage(`<div style="font-weight:bold; color:#ffd54f; font-size:15px; margin-bottom:12px; text-align:center;">[ 던전 가이드 ]</div>⚔️ <b>행동력 (턴)</b>: 전진할 때마다 1턴 소모. 밤(20턴)이 되면 자야 합니다.<br><br>🍖 <b>허기와 피로도</b>: 허기가 0일 때 잠을 자면 피로도가 크게 상승합니다! <b>피로도가 100이 되면 공격/방어력이 반토막 나며, 매 턴 체력을 잃습니다.</b><br><br>💀 <b>사망 페널티</b>: 파티장이 기절하면 소모품 전부와 골드 절반을 잃습니다.<br><br>💎 <b>비석</b>: 층마다 다음 층으로 가는 비석이 숨겨져 있습니다.<br><br>💰 <b>주민 후원</b>: 사냥한 몬스터 5마리 단위로 귀환 시 마을 주민들이 후원금을 줍니다.`);
 }
 
 function showTownMenu() {
@@ -287,7 +296,6 @@ function showTownMenu() {
     
     if(sceneText) sceneText.innerHTML = `[마을 - ${player.year}년 ${player.month}월 ${((player.day - 1) % 30) + 1}일]<br>소지금: ${player.gold}G | 위상: ${player.prestige}`;
     
-    // 💡 6. 일터 (알바) 명시
     if(actionArea) {
         actionArea.innerHTML = `
             <div class="action-grid">
@@ -299,16 +307,16 @@ function showTownMenu() {
                 <div class="icon-btn" onclick="fadeTransition(openHospital)">${icons.hospital}<span>병원</span></div>
                 <div class="icon-btn" onclick="fadeTransition(openWarehouse)">${icons.warehouse}<span>창고</span></div>
             </div>
-            <div class="action-grid" style="grid-template-columns:1fr;"><div class="icon-btn" style="border-color:#555;" onclick="fadeTransition(() => openInventory('town'))">${icons.bag}<span>내 가방 열기</span></div></div>
+            <div class="action-grid" style="grid-template-columns:1fr;"><div class="icon-btn" style="border-color:#555;" onclick="fadeTransition(() => openInventory('town'))">${icons.bag}<span>내 가방 및 장비 열기</span></div></div>
         `;
     }
 }
 
 function renderTownUI() { updateAllStats(); showTownMenu(); }
 
-// 💡 2, 3, 4. 투기장 16강 대진표 및 밸런스 기반 모험가 생성 로직
+// 💡 7. 투기장 동료 제외 솔로 1v1 생성 로직
 function generateArenaFighter(tier) {
-    let jobs = Object.keys(jobData).filter(j => !j.includes('회복')); // 무한 힐 방지
+    let jobs = Object.keys(jobData).filter(j => !j.includes('회복')); 
     let job = jobs[Math.floor(Math.random() * jobs.length)];
     let d = jobData[job]; let lv = tier * 5; 
     return {
@@ -321,7 +329,7 @@ function generateArenaFighter(tier) {
 
 function openArena() {
     if(player.arenaEnteredThisMonth) return showMessage("이번 달 투기장 대회는 이미 참가하셨습니다.");
-    showMessage(`[ 투기장 토너먼트 ]<br>매월 1회 참가 가능 (참가비 100G).<br>16인의 모험가들이 토너먼트를 펼칩니다.<br><br>※ 전투 중 포션 사용 불가<br>※ 매 경기 종료 후 체력/마나 전부 회복`, null, [{txt: "참가 (100G)", act: "startArena()"}, {txt: "취소", act: "closeModal()"}]);
+    showMessage(`[ 투기장 토너먼트 ]<br>매월 1회 참가 가능 (참가비 100G).<br>16인의 모험가가 무작위 대진표로 겨룹니다!<br><br>※ 오직 파티장 1인만 전투에 참여합니다.<br>※ 전투 중 포션 사용 불가<br>※ 매 경기 종료 후 체력/마나 전부 회복`, null, [{txt: "참가 (100G)", act: "startArena()"}, {txt: "취소", act: "closeModal()"}]);
 }
 
 function startArena() {
@@ -329,28 +337,37 @@ function startArena() {
     if(player.gold < 100) return showMessage("골드가 부족합니다.");
     player.gold -= 100; player.arenaEnteredThisMonth = true; saveGame();
     
-    let fighters = [{ isPlayer: true, name: player.party[0].name, tier: player.rank }];
-    for(let i=0; i<15; i++) {
-        let t = Math.max(1, player.rank + Math.floor(Math.random() * 7) - 3); // 내 기준 -3 ~ +3 등급
+    // 💡 7. 나와 랜덤하게 참여하는 내 동료 세팅
+    let fighters = [{ ...player.party[0], isRealPlayer: true, tier: player.rank }];
+    if (player.party.length > 1 && Math.random() < 0.5) {
+        let comp = player.party[1 + Math.floor(Math.random()*(player.party.length-1))];
+        fighters.push({ ...comp, isRealPlayer: false, isCompanion: true, tier: comp.rank, name: `[내 동료] ${comp.name}` });
+    }
+    
+    while(fighters.length < 16) {
+        let t = Math.max(1, player.rank + Math.floor(Math.random() * 7) - 3); 
         fighters.push(generateArenaFighter(t));
     }
-    fighters.sort(() => 0.5 - Math.random()); // 16명 무작위 셔플 (대진표 생성)
+    fighters.sort(() => 0.5 - Math.random()); 
     arenaState = { round: 16, fighters: fighters };
     showBracketUI();
 }
 
+// 💡 3. 대진표 (Bracket) UI
 function showBracketUI() {
-    let html = `<div style="text-align:center; font-weight:bold; color:#ffc107; font-size:16px; margin-bottom:15px;">[ ${arenaState.round === 2 ? '결승전' : `${arenaState.round}강 대진표`} ]</div>`;
-    html += `<div style="display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto; font-size:12px; margin-bottom:15px; padding-right:5px;">`;
+    let html = `<div style="text-align:center; font-weight:bold; color:#ffc107; font-size:15px; margin-bottom:12px;">[ ${arenaState.round === 2 ? '결승전' : `${arenaState.round}강 대진표`} ]</div>`;
+    html += `<div style="display:flex; flex-direction:column; gap:6px; max-height:300px; overflow-y:auto; font-size:11px; padding-right:5px; margin-bottom:10px;">`;
     
     for(let i=0; i<arenaState.fighters.length; i+=2) {
         let f1 = arenaState.fighters[i]; let f2 = arenaState.fighters[i+1];
-        let p1Name = f1.isPlayer ? `<span style="color:#4caf50; font-weight:bold;">(나) ${f1.name}</span>` : `[${f1.tier}등급] ${f1.name}`;
-        let p2Name = f2.isPlayer ? `<span style="color:#4caf50; font-weight:bold;">(나) ${f2.name}</span>` : `[${f2.tier}등급] ${f2.name}`;
-        html += `<div style="background:#1a1a1a; padding:10px; border:1px solid #333; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
-                    <div style="width:40%; text-align:right;">${p1Name}</div>
+        let p1n = f1.isRealPlayer ? `<span style="color:#4caf50; font-weight:bold;">(나) ${f1.name}</span>` : `[${f1.tier}등급] ${f1.name}`;
+        let p2n = f2.isRealPlayer ? `<span style="color:#4caf50; font-weight:bold;">(나) ${f2.name}</span>` : `[${f2.tier}등급] ${f2.name}`;
+        
+        let isMyMatch = f1.isRealPlayer || f2.isRealPlayer;
+        html += `<div style="background:#1a1a1a; padding:10px; border:${isMyMatch?'1px solid #4caf50':'1px solid #333'}; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="width:40%; text-align:right;">${p1n}</div>
                     <div style="width:20%; text-align:center; color:#e53935; font-weight:bold;">VS</div>
-                    <div style="width:40%; text-align:left;">${p2Name}</div>
+                    <div style="width:40%; text-align:left;">${p2n}</div>
                  </div>`;
     }
     html += `</div>`;
@@ -359,10 +376,10 @@ function showBracketUI() {
 
 function startArenaMatch() {
     closeModal();
-    let pIdx = arenaState.fighters.findIndex(f => f.isPlayer);
+    let pIdx = arenaState.fighters.findIndex(f => f.isRealPlayer);
     currentEnemy = (pIdx % 2 === 0) ? arenaState.fighters[pIdx + 1] : arenaState.fighters[pIdx - 1];
     
-    player.party.forEach(p => { let ts = p.isPlayer ? getTotalStats() : p; p.hp = ts.maxHp; p.mp = ts.maxMp; }); updateAllStats();
+    let ts = getTotalStats(0); player.party[0].hp = ts.maxHp; player.party[0].mp = ts.maxMp; updateAllStats();
     let rText = arenaState.round === 2 ? "결승전" : `${arenaState.round}강전`;
     combatState.turnIndex = 0; renderCombatTurn(`투기장 ${rText}이 시작되었습니다!`, false);
 }
@@ -404,9 +421,10 @@ function openHospital() {
 
 function healCompanion(index, cost) {
     if(player.gold < cost) return showMessage(`치료비(${cost}G)가 부족합니다.`);
-    player.gold -= cost; player.party[index].hp = player.party[index].maxHp; updateAllStats(); showMessage(`${player.party[index].name}의 치료가 완료되었습니다.`, openHospital);
+    player.gold -= cost; let s = getTotalStats(index); player.party[index].hp = s.maxHp; updateAllStats(); showMessage(`${player.party[index].name}의 치료가 완료되었습니다.`, openHospital);
 }
 
+// 💡 5. 승급 퀘스트 군주 삭제
 function openGuild() {
     const sceneText = document.getElementById('scene-text'); const actionArea = document.getElementById('action-area');
     sceneText.innerHTML = `[용병 길드]<br>최대 6인 구성, 중복 직업 불가.`;
@@ -414,14 +432,14 @@ function openGuild() {
 }
 
 function checkPromotion() {
-    let n = player.rank + 1; let bReq = n - 1; let mReq = 5; let pReq = n * 100;
-    let bCount = player.bossKills[bReq] || 0; let mCount = player.mobKills[n] || 0;
+    let n = player.rank + 1; let mReq = n * 10; let pReq = n * 100;
+    let mCount = player.mobKills[n] || 0;
     
-    if(bCount >= 1 && mCount >= mReq && player.prestige >= pReq) {
+    if(mCount >= mReq && player.prestige >= pReq) {
         player.rank++; player.prestige += 10;
         showMessage(`🎉 <b>${player.rank}등급으로 승급했습니다!</b> 🎉<br>위상 +10 획득! 새로운 스킬이 개방되었습니다.`, openGuild); saveGame();
     } else {
-        showMessage(`[${n}등급 승급 조건]<br>${bCount>=1?'✅':'❌'} ${bReq}층 군주 처치 ( ${bCount} / 1 )<br>${mCount>=mReq?'✅':'❌'} ${n}층 몬스터 처치 ( ${mCount} / ${mReq} )<br>${player.prestige>=pReq?'✅':'❌'} 위상 달성 ( ${player.prestige} / ${pReq} )<br><br><span style="font-size:11px; color:#aaa;">※ 위상은 승급 및 투기장 성적으로 얻습니다.</span>`);
+        showMessage(`[${n}등급 승급 조건]<br>${mCount>=mReq?'✅':'❌'} ${n}층 몬스터 처치 ( ${mCount} / ${mReq} )<br>${player.prestige>=pReq?'✅':'❌'} 위상 달성 ( ${player.prestige} / ${pReq} )<br><br><span style="font-size:11px; color:#aaa;">※ 위상은 승급 및 투기장 성적으로 얻습니다.</span>`);
     }
 }
 
@@ -581,6 +599,7 @@ function getMinimapHTML() {
     html += '</div></div>'; return html;
 }
 
+// 💡 2. 지도 표시 UI 보강 ("현재 구역 이동" 명시)
 function renderDungeonUI() {
     updateDungeonTimer(); document.getElementById('equip-ui-overlay').classList.add('hidden');
     const sceneText = document.getElementById('scene-text'); const actionArea = document.getElementById('action-area');
@@ -591,7 +610,6 @@ function renderDungeonUI() {
         return;
     }
     
-    // 💡 1. 5턴(칸) 이동 복구
     if (player.stepsLeft > 0) {
         sceneText.innerHTML = getMinimapHTML() + `[이동 중]<br>남은 거리: ${player.stepsLeft}보<br>남은 턴: ${player.maxTurn - player.turn} / 20`;
         actionArea.innerHTML = `<div class="action-grid" style="grid-template-columns:1fr;"><div class="icon-btn" style="border-color:#888; padding:24px;" onclick="stepForward()"><span style="font-size:14px;">전진 (1턴 소모)</span></div><div class="icon-btn" onclick="openInventory('dungeon')">${icons.bag}<span>가방 확인</span></div></div>`;
@@ -599,14 +617,14 @@ function renderDungeonUI() {
     }
     
     let currentName = mapGrid[player.pos.y][player.pos.x].n;
-    sceneText.innerHTML = getMinimapHTML() + `[${player.floor}층 - ${currentName}]<br>어디로 가시겠습니까?`;
+    sceneText.innerHTML = getMinimapHTML() + `[${player.floor}층 - ${currentName} 구역]<br><span style="font-size:11px; color:#999;">※ 방향을 눌러 인접한 구역으로 5칸 이동합니다.</span>`;
 
     let gridHtml = '<div class="compass-grid">';
     for(let y=0; y<3; y++) {
         for(let x=0; x<3; x++) {
             let isCurr = (player.pos.x === x && player.pos.y === y);
             let isAdj = Math.abs(x - player.pos.x) <= 1 && Math.abs(y - player.pos.y) <= 1 && !isCurr;
-            if (isCurr) gridHtml += `<div class="compass-empty compass-current">현재위치</div>`;
+            if (isCurr) gridHtml += `<div class="compass-empty compass-current">현재구역</div>`;
             else if (isAdj) gridHtml += `<button class="compass-btn" onclick="startJourney(${x},${y})"><span>${mapGrid[y][x].n}</span></button>`;
             else gridHtml += `<div class="compass-empty">이동불가</div>`;
         }
@@ -625,12 +643,13 @@ function showSleepMenu() { showMessage("어떻게 주무시겠습니까?", null,
 
 function sleepInDungeon(sleepUntilClose) {
     if (sleepUntilClose) { let daysLeft = player.maxDungeonDay + 1 - player.dungeonDay; passTime(daysLeft); return fadeTransition(() => { returnToTown(false); }); }
+    
     if (player.hunger <= 0) player.fatigue = Math.min(100, player.fatigue + 30);
     else if (player.hunger >= 100) player.fatigue = Math.max(0, player.fatigue - 50);
     else player.fatigue = Math.max(0, player.fatigue - 20); 
     
-    player.party.forEach(p => {
-        let s = p.isPlayer ? getTotalStats() : p;
+    player.party.forEach((p, i) => {
+        let s = p.isPlayer ? getTotalStats(0) : getTotalStats(i);
         if(p.hp > 0) { p.hp = Math.min(s.maxHp, p.hp + Math.floor(s.maxHp * 0.3)); p.mp = Math.min(s.maxMp, p.mp + Math.floor(s.maxMp * 0.3)); }
     });
 
@@ -640,8 +659,17 @@ function sleepInDungeon(sleepUntilClose) {
 
 function startJourney(x, y) { player.targetPos = {x, y}; player.stepsLeft = 5; renderDungeonUI(); }
 
+// 💡 9. 피로도 도트 데미지 적용
 function stepForward() {
-    player.turn++; player.stepsLeft--; updateAllStats();
+    player.turn++; player.stepsLeft--; 
+    if(player.fatigue >= 100) {
+        player.party.forEach((p, i) => { 
+            let s = p.isPlayer ? getTotalStats(0) : getTotalStats(i);
+            if(p.hp > 0) p.hp = Math.max(0, p.hp - Math.floor(s.maxHp * 0.05)); 
+        });
+    }
+    updateAllStats();
+    if(player.party[0].hp <= 0) return fadeTransition(() => { returnToTown(true); });
     
     const checkArr = () => {
         if (player.stepsLeft <= 0) {
@@ -679,10 +707,13 @@ function stepForward() {
 
 function goNextFloor() { player.floor++; player.maxDungeonDay += 5; generateFloor(); fadeTransition(() => { showMessage(`${player.floor}층에 진입했습니다!<br>던전 유지 기간이 5일 추가되었습니다.`, () => { renderDungeonUI(); }); }); }
 
+// 💡 8. 몬스터 피통 버프 (250으로 기준점 증가)
 function startCombat(isBoss = false) {
     updateDungeonTimer(); 
     let f = player.floor;
-    let baseHp = Math.floor(150 * Math.pow(3.5, f - 1) + (Math.random() * 20)); let baseAtk = Math.floor(40 * Math.pow(3.5, f - 1) + (Math.random() * 10)); let baseDef = Math.floor(12 * Math.pow(3, f - 1) + (Math.random() * 5));
+    let baseHp = Math.floor(300 * Math.pow(3, f - 1) + (Math.random() * 20)); 
+    let baseAtk = Math.floor(40 * Math.pow(3, f - 1) + (Math.random() * 10)); 
+    let baseDef = Math.floor(12 * Math.pow(3, f - 1) + (Math.random() * 5));
     
     if (isBoss) {
         let bTier = f + 3; let bName = floorBosses[f] || `심연의 군주`;
@@ -698,6 +729,9 @@ function startCombat(isBoss = false) {
 
 function renderCombatTurn(logMsg = "", isWaiting = false) {
     if (!isWaiting) while(combatState.turnIndex < player.party.length && player.party[combatState.turnIndex].hp <= 0) combatState.turnIndex++;
+    
+    // 💡 7. 투기장은 오직 [0]번(파티장)만 참가하도록 루프 탈출
+    if (currentEnemy && currentEnemy.isArena && combatState.turnIndex > 0) { executeEnemyTurn(); return; }
     if (combatState.turnIndex >= player.party.length && !isWaiting) { executeEnemyTurn(); return; }
 
     let p = Math.max(0, (currentEnemy.hp / currentEnemy.maxHp) * 100);
@@ -737,10 +771,9 @@ function showSkillList() {
     actionArea.innerHTML = html;
 }
 
-// 💡 3. 밸런스를 맞춘 통합 데미지 공식
 function calcMemberDamage(member, isSkill, skillMult = 1.0) {
     let dmg = 0; let s = member; 
-    if (member.isPlayer) s = getTotalStats();
+    if (member.isPlayer) s = getTotalStats(0);
     
     if(!member.job) return Math.floor((member.atk || 10) * (isSkill ? skillMult : 1.0)); // 일반 몬스터
 
@@ -753,10 +786,36 @@ function calcMemberDamage(member, isSkill, skillMult = 1.0) {
     return Math.floor(dmg * (isSkill ? skillMult : 1.0));
 }
 
+// 💡 1. 회복법사 홀리에로우 선택 힐 기능 적용
+function executeHolyArrow(targetIdx, skillIdx) {
+    closeModal();
+    let actor = player.party[combatState.turnIndex];
+    let availableSkills = jobData[actor.job].skills.filter(s => actor.rank >= s.rank);
+    if (actor.isPlayer) player.equipped["정수"].forEach(e => { if (e.skill) availableSkills.push(e.skill); });
+    let sk = availableSkills[skillIdx];
+    actor.mp -= sk.mp; 
+    
+    let target = player.party[targetIdx];
+    let healAmt = Math.floor((actor.isPlayer ? getTotalStats(0).matk : actor.matk) * 0.5); // 소량 회복
+    let targetMaxHp = target.isPlayer ? getTotalStats(0).maxHp : getTotalStats(targetIdx).maxHp;
+    target.hp = Math.min(targetMaxHp, target.hp + healAmt);
+    
+    // 공격 진행
+    let rawDmg = Math.max(1, calcMemberDamage(actor, true, sk.mult) - currentEnemy.def);
+    let variance = rawDmg * (0.8 + Math.random() * 0.4);
+    let isCrit = Math.random() < 0.1;
+    let dmg = Math.floor(isCrit ? variance * 1.5 : variance);
+    let critText = isCrit ? ` <span style="color:#ff9800; font-weight:bold;">(크리티컬!)</span>` : "";
+    
+    let log = `[${actor.name||actor.job}]의 [${sk.n}]! 적에게 ${dmg} 피해.${critText}<br><span style="color:#4caf50">${target.name||target.job} 체력 ${healAmt} 회복!</span>`;
+    currentEnemy.hp = Math.max(0, currentEnemy.hp - dmg);
+    
+    proceedCombat(log);
+}
+
 function combatAction(act, skillIdx) {
     let actor = player.party[combatState.turnIndex]; let log = ""; let dmg = 0;
     
-    // 💡 5. 오차범위 (+-20%) 및 크리티컬 (10% 확률 1.5배)
     if (act === 'attack' || act === 'skill') {
         let sk = null;
         if(act === 'skill') {
@@ -764,12 +823,22 @@ function combatAction(act, skillIdx) {
             if (actor.isPlayer) player.equipped["정수"].forEach(e => { if (e.skill) availableSkills.push(e.skill); });
             sk = availableSkills[skillIdx];
             if (actor.mp < sk.mp) return renderCombatTurn("마나가 부족합니다!", false);
+            
+            // 홀리 애로우일 경우 모달 팝업으로 타겟 선택 후 별도 함수로 진행
+            if (sk.isHolyArrow) {
+                let btns = player.party.map((p, i) => { if(p.hp > 0) return { txt: `${p.name||p.job} 회복`, act: `executeHolyArrow(${i}, ${skillIdx})` }; return null; }).filter(b=>b);
+                btns.push({txt: "취소", act: "closeModal()"});
+                return showMessage("누구를 회복시키겠습니까?", null, btns);
+            }
+            
             actor.mp -= sk.mp;
         }
 
         if(sk && sk.isHeal) {
-            let healAmt = Math.floor((actor.isPlayer ? getTotalStats().matk : actor.matk) * sk.mult);
-            player.party.forEach(p => { if(p.hp > 0) { let mHp = p.isPlayer ? getTotalStats().maxHp : p.maxHp; p.hp = Math.min(mHp, p.hp + healAmt); } });
+            let healAmt = Math.floor((actor.isPlayer ? getTotalStats(0).matk : actor.matk) * sk.mult);
+            player.party.forEach((p, i) => { 
+                if(p.hp > 0) { let mHp = p.isPlayer ? getTotalStats(0).maxHp : getTotalStats(i).maxHp; p.hp = Math.min(mHp, p.hp + healAmt); } 
+            });
             log = `[${actor.name||actor.job}]의 [${sk.n}]! 파티 전체 체력 ${healAmt} 회복.`;
         } else {
             let rawDmg = Math.max(1, calcMemberDamage(actor, !!sk, sk ? sk.mult : 1.0) - currentEnemy.def);
@@ -786,13 +855,20 @@ function combatAction(act, skillIdx) {
         else { log = "도망 실패! 빈틈을 보였다!"; }
     }
     
+    proceedCombat(log);
+}
+
+function proceedCombat(log) {
     renderCombatTurn(log, true); 
-    
     playShakeEffect(() => {
         updateAllStats();
         if (currentEnemy && currentEnemy.hp <= 0) return executeWin(log);
         
-        combatState.turnIndex++; let isAllDead = true; let tempIdx = combatState.turnIndex;
+        combatState.turnIndex++; 
+        // 💡 투기장이면 동료 턴 무시
+        if(currentEnemy.isArena) { setTimeout(executeEnemyTurn, 400); return; }
+        
+        let isAllDead = true; let tempIdx = combatState.turnIndex;
         while(tempIdx < player.party.length) { if(player.party[tempIdx].hp > 0) { isAllDead = false; break; } tempIdx++; }
         if (isAllDead || combatState.turnIndex >= player.party.length) setTimeout(executeEnemyTurn, 400); 
         else renderCombatTurn(log, false); 
@@ -802,21 +878,22 @@ function combatAction(act, skillIdx) {
 function executeEnemyTurn() {
     let alive = player.party.filter(p => p.hp > 0);
     
-    if(alive.length === 0) {
+    if(alive.length === 0 || (currentEnemy.isArena && player.party[0].hp <= 0)) {
         if(currentEnemy.isArena) {
             currentEnemy = null; let pGain = 0, gGain = 0;
             if(arenaState.round === 2) { pGain = 70; gGain = 2000 * player.rank; } else if(arenaState.round === 4) { pGain = 30; gGain = 1000 * player.rank; } else if(arenaState.round === 8) { pGain = 10; gGain = 500 * player.rank; }
             player.prestige += pGain; player.gold += gGain; let rText = arenaState.round === 2 ? "결승전" : `${arenaState.round}강`;
-            player.party.forEach(p => { let ts = p.isPlayer ? getTotalStats() : p; p.hp = ts.maxHp; p.mp = ts.maxMp; });
+            player.party.forEach((p,i) => { let ts = p.isPlayer ? getTotalStats(0) : getTotalStats(i); p.hp = ts.maxHp; p.mp = ts.maxMp; });
             return showMessage(`[투기장 패배]<br>${rText}에서 탈락했습니다.<br>${pGain>0 ? `위상 +${pGain}, 위로금 ${gGain}G 획득.` : '참가 보상이 없습니다.'}`, renderTownUI);
         }
         return returnToTown(true);
     }
     
-    let target = alive[Math.floor(Math.random() * alive.length)]; let tDef = target.isPlayer ? getTotalStats().def : target.def;
-    let sk = null; let logAction = '공격';
+    let target = currentEnemy.isArena ? player.party[0] : alive[Math.floor(Math.random() * alive.length)]; 
+    let targetIdx = player.party.findIndex(p => p === target);
+    let tDef = target.isPlayer ? getTotalStats(0).def : getTotalStats(targetIdx).def;
     
-    // 💡 1. 투기장 모험가도 스킬 사용
+    let sk = null; let logAction = '공격';
     if(currentEnemy.isArena && Math.random() < 0.3 && currentEnemy.mp > 0) {
         let skills = jobData[currentEnemy.job].skills.filter(s => currentEnemy.tier >= s.rank);
         if(skills.length > 0) { sk = skills[Math.floor(Math.random()*skills.length)]; logAction = `[${sk.n}]`; currentEnemy.mp -= sk.mp || 0; }
@@ -838,8 +915,8 @@ function executeEnemyTurn() {
                 currentEnemy = null; let pGain = 0, gGain = 0;
                 if(arenaState.round === 2) { pGain = 70; gGain = 2000 * player.rank; } else if(arenaState.round === 4) { pGain = 30; gGain = 1000 * player.rank; } else if(arenaState.round === 8) { pGain = 10; gGain = 500 * player.rank; }
                 player.prestige += pGain; player.gold += gGain; let rText = arenaState.round === 2 ? "결승전" : `${arenaState.round}강`;
-                player.party.forEach(p => { let ts = p.isPlayer ? getTotalStats() : p; p.hp = ts.maxHp; p.mp = ts.maxMp; }); updateAllStats();
-                return showMessage(`[투기장 패배]<br>${rText}에서 탈락했습니다.<br>${pGain>0 ? `위상 +${pGain}, 위로금 ${gGain}G 획득.` : '참가 보상이 없습니다.'}`, renderTownUI);
+                player.party.forEach((p,i) => { let ts = p.isPlayer ? getTotalStats(0) : getTotalStats(i); p.hp = ts.maxHp; p.mp = ts.maxMp; }); updateAllStats();
+                return showMessage(`[투기장 패배]<br>${rText}에서 파티장이 쓰러져 탈락했습니다.<br>${pGain>0 ? `위상 +${pGain}, 위로금 ${gGain}G 획득.` : '참가 보상이 없습니다.'}`, renderTownUI);
             }
             return fadeTransition(() => { returnToTown(true); });
         }
@@ -847,17 +924,18 @@ function executeEnemyTurn() {
     });
 }
 
+// 💡 3. 투기장 타 경기 자동 시뮬레이션
 function executeWin(lastLog) {
     if (currentEnemy.isArena) {
         currentEnemy = null;
-        
-        // 💡 2. 투기장 타 경기 자동 시뮬레이션
         let nextFighters = [];
         for(let i=0; i<arenaState.fighters.length; i+=2) {
             let f1 = arenaState.fighters[i]; let f2 = arenaState.fighters[i+1];
-            if (f1.isPlayer || f2.isPlayer) { nextFighters.push(f1.isPlayer ? f1 : f2); } 
+            if (f1.isRealPlayer || f2.isRealPlayer) { nextFighters.push(f1.isRealPlayer ? f1 : f2); } 
             else {
-                let f1WinProb = Math.max(0.1, Math.min(0.9, 0.5 + (f1.tier - f2.tier) * 0.1));
+                let f1Power = (f1.atk + f1.matk + f1.def + f1.maxHp*0.2) * Math.pow(3, f1.tier);
+                let f2Power = (f2.atk + f2.matk + f2.def + f2.maxHp*0.2) * Math.pow(3, f2.tier);
+                let f1WinProb = Math.max(0.1, Math.min(0.9, f1Power / (f1Power + f2Power)));
                 nextFighters.push(Math.random() < f1WinProb ? f1 : f2);
             }
         }
@@ -868,7 +946,7 @@ function executeWin(lastLog) {
             let eq = generateEquip(player.rank + 2); player.equipList.push(eq);
             showMessage(`🎉 <b>투기장 최종 우승!</b> 🎉<br>모든 상대를 꺾었습니다!<br>위상 +100, 상금 ${5000*player.rank}G, 장비 [${eq.name}] 획득!`, renderTownUI);
         } else {
-            arenaState.round /= 2; showMessage(`상대를 쓰러뜨렸습니다!<br>다음 라운드로 진출합니다.`, showBracketUI);
+            arenaState.round /= 2; showMessage(`승리했습니다! 다음 라운드로 진출합니다.`, showBracketUI);
         }
         return;
     }
@@ -912,30 +990,38 @@ function returnToTown(isGameOver) {
 
     if (reward > 0) { player.gold += reward; msg += `<br><br><span style="color:#ffd54f">마을 주민들이 몬스터 ${kills}마리 토벌에 감사하며 <b>${reward}G</b>의 후원금을 건넸습니다!</span>`; }
     
-    let ts = getTotalStats(); player.party[0].hp = ts.maxHp; player.party[0].mp = ts.maxMp; saveGame(); showMessage(msg, renderTownUI);
+    let ts = getTotalStats(0); player.party[0].hp = ts.maxHp; player.party[0].mp = ts.maxMp; saveGame(); showMessage(msg, renderTownUI);
 }
 
+// 💡 6. 장비 슬롯 UI (Paper Doll 형상 랜더링)
 function renderEquipSlots() {
-    let html = '';
-    equipTypes.forEach(type => {
-        if(type === '반지') {
-            for(let i=0; i<4; i++) {
-                let eq = player.equipped['반지'][i];
-                if(eq) html += `<div class="eq-slot filled" onclick="unequipItem('반지', ${i})"><span class="eq-slot-title">[반지${i+1}]</span>${eq.name}</div>`;
-                else html += `<div class="eq-slot"><span class="eq-slot-title">[반지${i+1}]</span>비어있음</div>`;
-            }
-        } else {
-            let eq = player.equipped[type];
-            if(eq) html += `<div class="eq-slot filled" onclick="unequipItem('${type}', null)"><span class="eq-slot-title">[${type}]</span>${eq.name}</div>`;
-            else html += `<div class="eq-slot"><span class="eq-slot-title">[${type}]</span>비어있음</div>`;
-        }
-    });
-    for(let i=0; i<2; i++) {
-        let ess = player.equipped['정수'][i];
-        if(ess) html += `<div class="eq-slot es-slot filled" onclick="destroyEssenceConfirm(${i})"><span class="eq-slot-title">[정수${i+1}]</span>${ess.name}</div>`;
-        else html += `<div class="eq-slot"><span class="eq-slot-title">[정수${i+1}]</span>비어있음</div>`;
-    }
-    document.getElementById('equip-ui-overlay').innerHTML = html;
+    let eqObj = player.equipped;
+    let getEq = (type) => eqObj[type] ? `<div class="eq-slot filled" onclick="confirmUnequip('${type}', null)"><span class="eq-slot-title">[${type}]</span>${eqObj[type].name}</div>` : `<div class="eq-slot"><span class="eq-slot-title">[${type}]</span>비어있음</div>`;
+    let getRing = (idx) => eqObj['반지'][idx] ? `<div class="eq-slot filled" style="grid-area:rin${idx+1};" onclick="confirmUnequip('반지', ${idx})"><span class="eq-slot-title">[반지${idx+1}]</span>${eqObj['반지'][idx].name}</div>` : `<div class="eq-slot" style="grid-area:rin${idx+1};"><span class="eq-slot-title">[반지${idx+1}]</span>비어있음</div>`;
+    let getEss = (idx) => eqObj['정수'][idx] ? `<div class="eq-slot es-slot filled" style="grid-area:ess${idx+1};" onclick="destroyEssenceConfirm(${idx})"><span class="eq-slot-title">[정수${idx+1}]</span>${eqObj['정수'][idx].name}</div>` : `<div class="eq-slot es-slot" style="grid-area:ess${idx+1};"><span class="eq-slot-title">[정수${idx+1}]</span>비어있음</div>`;
+
+    let html = `
+        <div class="eq-slot" style="grid-area:weap; ${eqObj['무기']?'border-color:#ffd54f; color:#eee; background:#221b00;':''}" onclick="confirmUnequip('무기', null)"><span class="eq-slot-title">[무기]</span>${eqObj['무기']?eqObj['무기'].name:'비어있음'}</div>
+        <div class="eq-slot" style="grid-area:helm; ${eqObj['모자']?'border-color:#ffd54f; color:#eee; background:#221b00;':''}" onclick="confirmUnequip('모자', null)"><span class="eq-slot-title">[모자]</span>${eqObj['모자']?eqObj['모자'].name:'비어있음'}</div>
+        <div class="eq-slot" style="grid-area:neck; ${eqObj['목걸이']?'border-color:#ffd54f; color:#eee; background:#221b00;':''}" onclick="confirmUnequip('목걸이', null)"><span class="eq-slot-title">[목걸이]</span>${eqObj['목걸이']?eqObj['목걸이'].name:'비어있음'}</div>
+        
+        <div class="eq-slot" style="grid-area:glov; ${eqObj['장갑']?'border-color:#ffd54f; color:#eee; background:#221b00;':''}" onclick="confirmUnequip('장갑', null)"><span class="eq-slot-title">[장갑]</span>${eqObj['장갑']?eqObj['장갑'].name:'비어있음'}</div>
+        <div class="eq-slot" style="grid-area:ches; ${eqObj['상의']?'border-color:#ffd54f; color:#eee; background:#221b00;':''}" onclick="confirmUnequip('상의', null)"><span class="eq-slot-title">[상의]</span>${eqObj['상의']?eqObj['상의'].name:'비어있음'}</div>
+        <div class="eq-slot" style="grid-area:cape; ${eqObj['망토']?'border-color:#ffd54f; color:#eee; background:#221b00;':''}" onclick="confirmUnequip('망토', null)"><span class="eq-slot-title">[망토]</span>${eqObj['망토']?eqObj['망토'].name:'비어있음'}</div>
+        
+        ${getRing(0)}
+        <div class="eq-slot" style="grid-area:pant; ${eqObj['하의']?'border-color:#ffd54f; color:#eee; background:#221b00;':''}" onclick="confirmUnequip('하의', null)"><span class="eq-slot-title">[하의]</span>${eqObj['하의']?eqObj['하의'].name:'비어있음'}</div>
+        ${getRing(2)}
+        
+        ${getRing(1)}
+        <div class="eq-slot" style="grid-area:shoe; ${eqObj['신발']?'border-color:#ffd54f; color:#eee; background:#221b00;':''}" onclick="confirmUnequip('신발', null)"><span class="eq-slot-title">[신발]</span>${eqObj['신발']?eqObj['신발'].name:'비어있음'}</div>
+        ${getRing(3)}
+        
+        <div class="eq-slot" style="grid-area:brac; ${eqObj['팔찌']?'border-color:#ffd54f; color:#eee; background:#221b00;':''}" onclick="confirmUnequip('팔찌', null)"><span class="eq-slot-title">[팔찌]</span>${eqObj['팔찌']?eqObj['팔찌'].name:'비어있음'}</div>
+        ${getEss(0)}
+        ${getEss(1)}
+    `;
+    document.getElementById('paper-doll').innerHTML = html;
 }
 
 function openInventory(context) {
@@ -974,7 +1060,14 @@ function toggleEquip(idx, context) {
     updateAllStats(); openInventory(context);
 }
 
-function unequipItem(type, ringIdx) {
+// 💡 6. 해제/파괴 확인 팝업
+function confirmUnequip(type, ringIdx) {
+    let eq = type === '반지' ? player.equipped['반지'][ringIdx] : player.equipped[type];
+    if(!eq) return;
+    showMessage(`[${eq.name}]을(를) 해제하시겠습니까?`, null, [{txt:"해제하기", act:`executeUnequip('${type}', ${ringIdx})`}, {txt:"취소", act:"closeModal()"}]);
+}
+function executeUnequip(type, ringIdx) {
+    closeModal();
     if (type === '반지') { let eq = player.equipped['반지'].splice(ringIdx, 1)[0]; if(eq) player.equipList.push(eq); } 
     else { let eq = player.equipped[type]; player.equipped[type] = null; if(eq) player.equipList.push(eq); }
     updateAllStats(); openInventory(player.inDungeon ? (currentEnemy ? 'combat' : 'dungeon') : 'town');
@@ -986,6 +1079,7 @@ function toggleEssence(idx, context) {
 }
 
 function destroyEssenceConfirm(idx) {
+    if(!player.equipped["정수"][idx]) return;
     showMessage("정말로 파괴하시겠습니까? (장착 해제 및 영구 파괴)", null, [{txt:"파괴하기", act:`executeDestroyEssence(${idx})`}, {txt:"취소", act:"closeModal()"}]);
 }
 function executeDestroyEssence(idx) {
@@ -1004,7 +1098,7 @@ function useItem(type, context) {
 }
 
 function applyItem(type, targetIdx, context) {
-    player.items[type]--; let target = player.party[targetIdx]; let ts = target.isPlayer ? getTotalStats() : target;
+    player.items[type]--; let target = player.party[targetIdx]; let ts = target.isPlayer ? getTotalStats(0) : getTotalStats(targetIdx);
     if (type === 'hpPotion') { target.hp = Math.min(ts.maxHp, target.hp + 50); showMessage(`${target.name||target.job}의 HP가 50 회복되었습니다!`, () => openInventory(context)); } 
     else if (type === 'mpPotion') { target.mp = Math.min(ts.maxMp, target.mp + 30); showMessage(`${target.name||target.job}의 MP가 30 회복되었습니다!`, () => openInventory(context)); }
     updateAllStats();
