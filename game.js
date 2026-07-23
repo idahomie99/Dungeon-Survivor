@@ -15,7 +15,6 @@ const provider = new firebase.auth.GoogleAuthProvider();
 
 let currentUser = null;
 
-// 💡 11. 직업 세분화 및 1. 마나소모 소폭 증가
 const baseClasses = {
     '바바리안': { img: 'image/barbarian.png', desc: '특성을 선택하여 다양한 전사로 성장합니다.' },
     '엘프': { img: 'image/elf.png', desc: '빠른 몸놀림과 날카로운 활시위로 적을 제압하는 궁수' },
@@ -38,11 +37,11 @@ const jobData = {
 };
 
 let player = {
-    gold: 1000, day: 1, year: 1, month: 1, // 💡 2. 날짜 시스템 변수
+    gold: 1000, day: 1, year: 1, month: 1,
     rank: 1, level: 1, exp: 0, maxExp: 150, hunger: 100, maxHunger: 100, fatigue: 0, prestige: 0,
     inDungeon: false, dungeonDay: 1, maxDungeonDay: 7, floor: 1, turn: 0, maxTurn: 20, dungeonKills: 0, dungeonGuideSeen: false,
     pos: {x: 1, y: 1}, visited: ['1,1'], targetPos: null, stepsLeft: 0,
-    bossKills: {}, mobKills: {}, // 승급 퀘스트 추적용
+    bossKills: {}, mobKills: {}, 
     items: { food: 5, hpPotion: 3, mpPotion: 2, ore: 0 }, equipList: [], essenceList: [],
     equipped: { "모자": null, "상의": null, "하의": null, "신발": null, "장갑": null, "무기": null, "망토": null, "팔찌": null, "목걸이": null, "반지": [], "정수": [] },
     warehouse: { items: { food: 0, hpPotion: 0, mpPotion: 0, ore: 0 }, equipList: [], essenceList: [] },
@@ -60,6 +59,7 @@ const floorBosses = { 1: "심연의 포식자, 그라둠", 2: "불사의 군신,
 const monsterImgs = { "동굴 슬라임": "image/caveslime.png", "동굴 박쥐": "image/cavebat.png", "지하 고블린": "image/undergroundgoblin.png", "굴착기 고블린": "image/minergoblin.png", "스켈레톤 워리어": "image/skeletonwarrior.png" };
 const mapGrid = [[{n:'북서'}, {n:'북'}, {n:'북동'}],[{n:'서'}, {n:'중앙'}, {n:'동'}],[{n:'남서'}, {n:'남'}, {n:'남동'}]];
 
+// 💡 8. 돌아가기(home) 아이콘 추가
 const icons = {
     dungeon: `<svg viewBox="0 0 24 24"><path d="M19 19V4h-4V3H9v1H5v15H3v2h18v-2h-2zm-6 0h-2v-2h2v2zm0-4h-2v-2h2v2z"/></svg>`,
     work: `<svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.49-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>`,
@@ -75,18 +75,17 @@ const icons = {
     skill: `<svg viewBox="0 0 24 24" fill="#00e5ff"><path d="M3 3h18v18H3z" fill="none"/><path d="M12 2l-2.42 7.58L2 12l7.58 2.42L12 22l2.42-7.58L22 12l-7.58-2.42z"/></svg>`,
     run: `<svg viewBox="0 0 24 24" fill="#bbb"><path d="M19 3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3 8h-3V8l-4 4 4 4v-3h3v-2z"/></svg>`,
     arena: `<svg viewBox="0 0 24 24" fill="#ffc107"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0 0 11 15.9V19H7v2h10v-2h-4v-3.1a5.01 5.01 0 0 0 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>`,
-    warehouse: `<svg viewBox="0 0 24 24" fill="#bbb"><path d="M4 6h16v2H4zm2 4h12v12H6z M11 12h2v4h-2z"/></svg>`
+    warehouse: `<svg viewBox="0 0 24 24" fill="#bbb"><path d="M4 6h16v2H4zm2 4h12v12H6z M11 12h2v4h-2z"/></svg>`,
+    home: `<svg viewBox="0 0 24 24" fill="#999"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>`
 };
 
 let guildRecruit = null;
 let currentEnemy = null; 
 let combatState = { turnIndex: 0 }; 
-let arenaState = { round: 16 }; // 투기장 라운드 상태
+let arenaState = { round: 16, fighters: [] }; // 💡 투기장 상태 저장 변수
 
 // 구글 로그인 및 세이브
-function googleLogin() {
-    auth.signInWithPopup(provider).then((result) => { currentUser = result.user; fadeTransition(() => { checkFirestoreSave(currentUser.uid); }); }).catch((error) => { alert("로그인에 실패했습니다: " + error.message); });
-}
+function googleLogin() { auth.signInWithPopup(provider).then((result) => { currentUser = result.user; fadeTransition(() => { checkFirestoreSave(currentUser.uid); }); }).catch((error) => { alert("로그인에 실패했습니다: " + error.message); }); }
 
 function checkFirestoreSave(uid) {
     db.collection("saves").doc(uid).get().then((doc) => {
@@ -105,9 +104,7 @@ function checkFirestoreSave(uid) {
     }).catch((error) => { alert("데이터를 불러오는 중 에러가 발생했습니다."); });
 }
 
-function saveGame() {
-    if (currentUser) { db.collection("saves").doc(currentUser.uid).set(player).catch((error) => { console.error("서버 저장 실패:", error); }); }
-}
+function saveGame() { if (currentUser) { db.collection("saves").doc(currentUser.uid).set(player).catch((error) => { console.error("서버 저장 실패:", error); }); } }
 
 function ensureSaveCompatibility() {
     if(player.year === undefined) { player.year = 1; player.month = 1; }
@@ -116,7 +113,6 @@ function ensureSaveCompatibility() {
     if(!player.mobKills) player.mobKills = {};
     if(player.arenaEnteredThisMonth === undefined) player.arenaEnteredThisMonth = false;
     
-    // 💡 10. 기존 세이브 장비 분리 마이그레이션
     if (!player.migratedEquip) {
         let toRemoveIds = [];
         for (let type in player.equipped) {
@@ -163,7 +159,7 @@ function showMessage(msg, callback, buttons) {
 }
 function closeModal() { const modal = document.getElementById('game-modal'); if(modal) modal.classList.add('hidden'); }
 
-// 💡 6. 배고픔 / 피로도 한글 반영
+// 💡 7. HUD 동적 레이아웃 조절 (1명일 때와 2명 이상일 때)
 function updateAllStats() {
     if(!player.party || player.party.length === 0) return;
     
@@ -189,14 +185,17 @@ function updateAllStats() {
         hudHtml += `</div>`;
     });
     
-    const hudArea = document.getElementById('hud-area'); if(hudArea) hudArea.innerHTML = hudHtml;
+    const hudArea = document.getElementById('hud-area'); 
+    if(hudArea) {
+        hudArea.style.gridTemplateColumns = player.party.length > 1 ? '1fr 1fr' : '1fr';
+        hudArea.innerHTML = hudHtml;
+    }
+    
     const expBar = document.getElementById('exp-bar'); if(expBar) expBar.style.width = `${(player.exp / player.maxExp) * 100}%`;
     const expText = document.getElementById('exp-text'); if(expText) expText.innerText = `Lv.${player.level} (${Math.floor(player.exp)}/${player.maxExp})`;
-
     saveGame(); 
 }
 
-// 💡 4. 성장은 기본 스탯만, 경험치통 확대
 function levelUp() {
     player.level++; player.exp -= player.maxExp; player.maxExp = Math.floor(player.maxExp * 2.2); 
     player.party.forEach(p => {
@@ -260,11 +259,9 @@ function showClassSelection() {
 }
 
 function promptSubClass(baseJob) {
-    if(baseJob === '바바리안') {
-        showMessage("바바리안 특성을 선택하세요.", null, [{txt: "탱커", act: "promptNickname('바바리안(탱커)')"}, {txt: "브루저", act: "promptNickname('바바리안(브루저)')"}, {txt: "광전사", act: "promptNickname('바바리안(광전사)')"}]);
-    } else if(baseJob === '마법사') {
-        showMessage("마법사 특성을 선택하세요.", null, [{txt: "전투마법", act: "promptNickname('마법사(전투마법)')"}, {txt: "회복마법", act: "promptNickname('마법사(회복마법)')"}]);
-    } else { promptNickname(baseJob); }
+    if(baseJob === '바바리안') showMessage("바바리안 특성을 선택하세요.", null, [{txt: "탱커", act: "promptNickname('바바리안(탱커)')"}, {txt: "브루저", act: "promptNickname('바바리안(브루저)')"}, {txt: "광전사", act: "promptNickname('바바리안(광전사)')"}]);
+    else if(baseJob === '마법사') showMessage("마법사 특성을 선택하세요.", null, [{txt: "전투마법", act: "promptNickname('마법사(전투마법)')"}, {txt: "회복마법", act: "promptNickname('마법사(회복마법)')"}]);
+    else promptNickname(baseJob); 
 }
 
 function promptNickname(job) { showMessage(`[캐릭터 생성]<br>선택한 직업: <b>${job}</b><br><br>사용할 닉네임을 입력해주세요:<br><input type="text" id="nickname-input" value="모험가" style="width:100%; padding:8px; margin-top:8px; background:#222; border:1px solid #444; color:#fff; border-radius:4px;">`, null, [{txt: "결정", act: "confirmNickname('" + job + "')"}]); }
@@ -289,11 +286,14 @@ function showTownMenu() {
     document.getElementById('equip-ui-overlay').classList.add('hidden');
     
     if(sceneText) sceneText.innerHTML = `[마을 - ${player.year}년 ${player.month}월 ${((player.day - 1) % 30) + 1}일]<br>소지금: ${player.gold}G | 위상: ${player.prestige}`;
+    
+    // 💡 6. 일터 (알바) 명시
     if(actionArea) {
         actionArea.innerHTML = `
             <div class="action-grid">
                 <div class="icon-btn" onclick="fadeTransition(tryEnterDungeon)">${icons.dungeon}<span>던전</span></div>
                 <div class="icon-btn" onclick="openArena()">${icons.arena}<span>투기장</span></div>
+                <div class="icon-btn" onclick="fadeTransition(openWorkplace)">${icons.work}<span>일터 (알바)</span></div>
                 <div class="icon-btn" onclick="fadeTransition(openShop)">${icons.shop}<span>상점</span></div>
                 <div class="icon-btn" onclick="fadeTransition(openGuild)">${icons.guild}<span>길드</span></div>
                 <div class="icon-btn" onclick="fadeTransition(openHospital)">${icons.hospital}<span>병원</span></div>
@@ -306,7 +306,19 @@ function showTownMenu() {
 
 function renderTownUI() { updateAllStats(); showTownMenu(); }
 
-// 💡 7. 투기장 시스템
+// 💡 2, 3, 4. 투기장 16강 대진표 및 밸런스 기반 모험가 생성 로직
+function generateArenaFighter(tier) {
+    let jobs = Object.keys(jobData).filter(j => !j.includes('회복')); // 무한 힐 방지
+    let job = jobs[Math.floor(Math.random() * jobs.length)];
+    let d = jobData[job]; let lv = tier * 5; 
+    return {
+        isPlayer: false, isArena: true, name: namePool[Math.floor(Math.random() * namePool.length)],
+        job: job, tier: tier, img: d.img, 
+        maxHp: d.maxHp + lv*10, hp: d.maxHp + lv*10, maxMp: d.maxMp + lv*5, mp: d.maxMp + lv*5,
+        atk: d.atk + lv, matk: d.matk + lv, def: d.def + lv, str: d.str + lv, dex: d.dex + lv, luk: d.luk + lv, int: d.int + lv
+    };
+}
+
 function openArena() {
     if(player.arenaEnteredThisMonth) return showMessage("이번 달 투기장 대회는 이미 참가하셨습니다.");
     showMessage(`[ 투기장 토너먼트 ]<br>매월 1회 참가 가능 (참가비 100G).<br>16인의 모험가들이 토너먼트를 펼칩니다.<br><br>※ 전투 중 포션 사용 불가<br>※ 매 경기 종료 후 체력/마나 전부 회복`, null, [{txt: "참가 (100G)", act: "startArena()"}, {txt: "취소", act: "closeModal()"}]);
@@ -315,23 +327,64 @@ function openArena() {
 function startArena() {
     closeModal();
     if(player.gold < 100) return showMessage("골드가 부족합니다.");
-    player.gold -= 100; player.arenaEnteredThisMonth = true; arenaState.round = 16; saveGame();
-    nextArenaMatch();
+    player.gold -= 100; player.arenaEnteredThisMonth = true; saveGame();
+    
+    let fighters = [{ isPlayer: true, name: player.party[0].name, tier: player.rank }];
+    for(let i=0; i<15; i++) {
+        let t = Math.max(1, player.rank + Math.floor(Math.random() * 7) - 3); // 내 기준 -3 ~ +3 등급
+        fighters.push(generateArenaFighter(t));
+    }
+    fighters.sort(() => 0.5 - Math.random()); // 16명 무작위 셔플 (대진표 생성)
+    arenaState = { round: 16, fighters: fighters };
+    showBracketUI();
 }
 
-function nextArenaMatch() {
-    player.party.forEach(p => { let ts = p.isPlayer ? getTotalStats() : p; p.hp = ts.maxHp; p.mp = ts.maxMp; }); updateAllStats();
-    let rankStr = arenaState.round === 2 ? "결승전" : `${arenaState.round}강전`;
+function showBracketUI() {
+    let html = `<div style="text-align:center; font-weight:bold; color:#ffc107; font-size:16px; margin-bottom:15px;">[ ${arenaState.round === 2 ? '결승전' : `${arenaState.round}강 대진표`} ]</div>`;
+    html += `<div style="display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto; font-size:12px; margin-bottom:15px; padding-right:5px;">`;
     
+    for(let i=0; i<arenaState.fighters.length; i+=2) {
+        let f1 = arenaState.fighters[i]; let f2 = arenaState.fighters[i+1];
+        let p1Name = f1.isPlayer ? `<span style="color:#4caf50; font-weight:bold;">(나) ${f1.name}</span>` : `[${f1.tier}등급] ${f1.name}`;
+        let p2Name = f2.isPlayer ? `<span style="color:#4caf50; font-weight:bold;">(나) ${f2.name}</span>` : `[${f2.tier}등급] ${f2.name}`;
+        html += `<div style="background:#1a1a1a; padding:10px; border:1px solid #333; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="width:40%; text-align:right;">${p1Name}</div>
+                    <div style="width:20%; text-align:center; color:#e53935; font-weight:bold;">VS</div>
+                    <div style="width:40%; text-align:left;">${p2Name}</div>
+                 </div>`;
+    }
+    html += `</div>`;
+    showMessage(html, null, [{txt: "내 경기 시작", act: "startArenaMatch()"}]);
+}
+
+function startArenaMatch() {
+    closeModal();
+    let pIdx = arenaState.fighters.findIndex(f => f.isPlayer);
+    currentEnemy = (pIdx % 2 === 0) ? arenaState.fighters[pIdx + 1] : arenaState.fighters[pIdx - 1];
+    
+    player.party.forEach(p => { let ts = p.isPlayer ? getTotalStats() : p; p.hp = ts.maxHp; p.mp = ts.maxMp; }); updateAllStats();
+    let rText = arenaState.round === 2 ? "결승전" : `${arenaState.round}강전`;
+    combatState.turnIndex = 0; renderCombatTurn(`투기장 ${rText}이 시작되었습니다!`, false);
+}
+
+function openWorkplace() {
+    const sceneText = document.getElementById('scene-text'); const actionArea = document.getElementById('action-area');
+    let daysToWork = 30 - (((player.day - 1) % 30) + 1) + 1;
+    sceneText.innerHTML = `[일터]<br>현재 달의 남은 일수: ${daysToWork}일<br>근무 시 말일까지 연속으로 일합니다 (일당 50G).`;
+    let html = `<div style="display:flex; flex-direction:column; gap:8px;">`;
+    ["식당", "대장간", "약국"].forEach(w => {
+        let prof = player.proficiencies[w].toFixed(1);
+        html += `<button class="btn" onclick="${prof >= 100 ? `showMessage('사업장 건축 기능은 준비 중입니다.')` : `doWork('${w}', ${daysToWork})`}">${prof >= 100 ? `${w} 운영 (준비중)` : `${w} 알바 (숙련도: ${prof})`}</button>`;
+    });
+    html += `</div><button class="btn" style="margin-top:12px; width:100%;" onclick="fadeTransition(renderTownUI)">돌아가기</button>`;
+    actionArea.innerHTML = html;
+}
+
+function doWork(place, days) {
     fadeTransition(() => {
-        showMessage(`[투기장 ${rankStr}]<br>준비되셨습니까?`, () => {
-            let jobs = Object.keys(jobData); let eJob = jobs[Math.floor(Math.random() * jobs.length)]; let d = jobData[eJob];
-            let eRank = Math.max(1, player.rank + Math.floor(Math.random()*3)-1);
-            let eHp = Math.floor(d.maxHp * Math.pow(1.5, eRank-1) * 2.0); let eAtk = Math.floor(d.atk * Math.pow(1.3, eRank-1)); let eDef = Math.floor(d.def * Math.pow(1.2, eRank-1));
-            
-            currentEnemy = { isArena: true, tier: eRank, name: `[투기장] ${eRank}등급 ${eJob}`, img: d.img, maxHp: eHp, hp: eHp, atk: eAtk, def: eDef, job: eJob };
-            combatState.turnIndex = 0; renderCombatTurn(`투기장 ${rankStr}이 시작되었습니다!`, false);
-        });
+        let earned = days * 50; player.gold += earned; player.proficiencies[place] += (days * 0.1);
+        if(passTime(days)) return; 
+        updateAllStats(); showMessage(`${days}일 동안 ${place}에서 알바하여 ${earned}G를 벌었습니다.`, renderTownUI);
     });
 }
 
@@ -354,7 +407,6 @@ function healCompanion(index, cost) {
     player.gold -= cost; player.party[index].hp = player.party[index].maxHp; updateAllStats(); showMessage(`${player.party[index].name}의 치료가 완료되었습니다.`, openHospital);
 }
 
-// 💡 8 & 9. 모험가 승급 및 위상
 function openGuild() {
     const sceneText = document.getElementById('scene-text'); const actionArea = document.getElementById('action-area');
     sceneText.innerHTML = `[용병 길드]<br>최대 6인 구성, 중복 직업 불가.`;
@@ -491,7 +543,6 @@ function generateFloor() {
     player.monumentPos = {x: mx, y: my}; player.monumentFound = false;
 }
 
-// 💡 4. 배고픔 0으로 시작
 function startDungeonExpedition() {
     player.dungeonEnteredThisMonth = true; player.inDungeon = true; 
     player.dungeonDay = 1; player.maxDungeonDay = 7; player.turn = 0; player.dungeonKills = 0; player.hunger = 0;
@@ -540,7 +591,7 @@ function renderDungeonUI() {
         return;
     }
     
-    // 💡 1 & 5. 5칸 전진 이동 로직 복구
+    // 💡 1. 5턴(칸) 이동 복구
     if (player.stepsLeft > 0) {
         sceneText.innerHTML = getMinimapHTML() + `[이동 중]<br>남은 거리: ${player.stepsLeft}보<br>남은 턴: ${player.maxTurn - player.turn} / 20`;
         actionArea.innerHTML = `<div class="action-grid" style="grid-template-columns:1fr;"><div class="icon-btn" style="border-color:#888; padding:24px;" onclick="stepForward()"><span style="font-size:14px;">전진 (1턴 소모)</span></div><div class="icon-btn" onclick="openInventory('dungeon')">${icons.bag}<span>가방 확인</span></div></div>`;
@@ -578,7 +629,6 @@ function sleepInDungeon(sleepUntilClose) {
     else if (player.hunger >= 100) player.fatigue = Math.max(0, player.fatigue - 50);
     else player.fatigue = Math.max(0, player.fatigue - 20); 
     
-    // 💡 10. 파티 전체 30% 회복
     player.party.forEach(p => {
         let s = p.isPlayer ? getTotalStats() : p;
         if(p.hp > 0) { p.hp = Math.min(s.maxHp, p.hp + Math.floor(s.maxHp * 0.3)); p.mp = Math.min(s.maxMp, p.mp + Math.floor(s.maxMp * 0.3)); }
@@ -687,8 +737,13 @@ function showSkillList() {
     actionArea.innerHTML = html;
 }
 
+// 💡 3. 밸런스를 맞춘 통합 데미지 공식
 function calcMemberDamage(member, isSkill, skillMult = 1.0) {
-    let dmg = 0; let s = member; if (member.isPlayer) s = getTotalStats();
+    let dmg = 0; let s = member; 
+    if (member.isPlayer) s = getTotalStats();
+    
+    if(!member.job) return Math.floor((member.atk || 10) * (isSkill ? skillMult : 1.0)); // 일반 몬스터
+
     if(member.job.includes('바바리안')) dmg = (s.atk*1.0) + (s.str*0.6) + (s.def*0.3);
     else if(member.job.includes('엘프')) dmg = (s.atk*1.0) + (s.dex*0.8) + (s.str*0.4);
     else if(member.job.includes('드워프')) dmg = (s.atk*1.0) + (s.def*0.5) + (s.str*0.3);
@@ -700,21 +755,30 @@ function calcMemberDamage(member, isSkill, skillMult = 1.0) {
 
 function combatAction(act, skillIdx) {
     let actor = player.party[combatState.turnIndex]; let log = ""; let dmg = 0;
-    if (act === 'attack') {
-        dmg = Math.max(1, calcMemberDamage(actor, false) - currentEnemy.def); log = `[${actor.name||actor.job}]의 공격! 적에게 ${dmg} 피해.`;
-    } else if (act === 'skill') {
-        let availableSkills = jobData[actor.job].skills.filter(s => actor.rank >= s.rank);
-        if (actor.isPlayer) player.equipped["정수"].forEach(e => { if (e.skill) availableSkills.push(e.skill); });
-        let sk = availableSkills[skillIdx];
-        if (actor.mp < sk.mp) return renderCombatTurn("마나가 부족합니다!", false);
-        actor.mp -= sk.mp; 
-        
-        if(sk.isHeal) {
+    
+    // 💡 5. 오차범위 (+-20%) 및 크리티컬 (10% 확률 1.5배)
+    if (act === 'attack' || act === 'skill') {
+        let sk = null;
+        if(act === 'skill') {
+            let availableSkills = jobData[actor.job].skills.filter(s => actor.rank >= s.rank);
+            if (actor.isPlayer) player.equipped["정수"].forEach(e => { if (e.skill) availableSkills.push(e.skill); });
+            sk = availableSkills[skillIdx];
+            if (actor.mp < sk.mp) return renderCombatTurn("마나가 부족합니다!", false);
+            actor.mp -= sk.mp;
+        }
+
+        if(sk && sk.isHeal) {
             let healAmt = Math.floor((actor.isPlayer ? getTotalStats().matk : actor.matk) * sk.mult);
             player.party.forEach(p => { if(p.hp > 0) { let mHp = p.isPlayer ? getTotalStats().maxHp : p.maxHp; p.hp = Math.min(mHp, p.hp + healAmt); } });
             log = `[${actor.name||actor.job}]의 [${sk.n}]! 파티 전체 체력 ${healAmt} 회복.`;
         } else {
-            dmg = Math.max(1, calcMemberDamage(actor, true, sk.mult) - currentEnemy.def); log = `[${actor.name||actor.job}]의 [${sk.n}]! 적에게 ${dmg} 피해.`;
+            let rawDmg = Math.max(1, calcMemberDamage(actor, !!sk, sk ? sk.mult : 1.0) - currentEnemy.def);
+            let variance = rawDmg * (0.8 + Math.random() * 0.4);
+            let isCrit = Math.random() < 0.1;
+            dmg = Math.floor(isCrit ? variance * 1.5 : variance);
+            let critText = isCrit ? ` <span style="color:#ff9800; font-weight:bold;">(크리티컬!)</span>` : "";
+            log = `[${actor.name||actor.job}]의 ${sk?`[${sk.n}]`:'공격'}! 적에게 ${dmg} 피해.${critText}`;
+            currentEnemy.hp = Math.max(0, currentEnemy.hp - dmg);
         }
     } else if (act === 'run') {
         if (!currentEnemy.isBoss) return;
@@ -722,12 +786,12 @@ function combatAction(act, skillIdx) {
         else { log = "도망 실패! 빈틈을 보였다!"; }
     }
     
-    if(act !== 'run') currentEnemy.hp = Math.max(0, currentEnemy.hp - dmg);
     renderCombatTurn(log, true); 
     
     playShakeEffect(() => {
         updateAllStats();
-        if (currentEnemy.hp <= 0) return executeWin(log);
+        if (currentEnemy && currentEnemy.hp <= 0) return executeWin(log);
+        
         combatState.turnIndex++; let isAllDead = true; let tempIdx = combatState.turnIndex;
         while(tempIdx < player.party.length) { if(player.party[tempIdx].hp > 0) { isAllDead = false; break; } tempIdx++; }
         if (isAllDead || combatState.turnIndex >= player.party.length) setTimeout(executeEnemyTurn, 400); 
@@ -737,22 +801,35 @@ function combatAction(act, skillIdx) {
 
 function executeEnemyTurn() {
     let alive = player.party.filter(p => p.hp > 0);
+    
     if(alive.length === 0) {
         if(currentEnemy.isArena) {
             currentEnemy = null; let pGain = 0, gGain = 0;
             if(arenaState.round === 2) { pGain = 70; gGain = 2000 * player.rank; } else if(arenaState.round === 4) { pGain = 30; gGain = 1000 * player.rank; } else if(arenaState.round === 8) { pGain = 10; gGain = 500 * player.rank; }
-            player.prestige += pGain; player.gold += gGain;
-            let rText = arenaState.round === 2 ? "결승전" : `${arenaState.round}강`;
+            player.prestige += pGain; player.gold += gGain; let rText = arenaState.round === 2 ? "결승전" : `${arenaState.round}강`;
             player.party.forEach(p => { let ts = p.isPlayer ? getTotalStats() : p; p.hp = ts.maxHp; p.mp = ts.maxMp; });
-            return showMessage(`[투기장 패배]<br>${rText}에서 탈락했습니다.<br>위상 +${pGain}, 위로금 ${gGain}G 획득.`, renderTownUI);
+            return showMessage(`[투기장 패배]<br>${rText}에서 탈락했습니다.<br>${pGain>0 ? `위상 +${pGain}, 위로금 ${gGain}G 획득.` : '참가 보상이 없습니다.'}`, renderTownUI);
         }
         return returnToTown(true);
     }
     
     let target = alive[Math.floor(Math.random() * alive.length)]; let tDef = target.isPlayer ? getTotalStats().def : target.def;
-    let eDmg = Math.max(1, currentEnemy.atk - tDef); 
+    let sk = null; let logAction = '공격';
+    
+    // 💡 1. 투기장 모험가도 스킬 사용
+    if(currentEnemy.isArena && Math.random() < 0.3 && currentEnemy.mp > 0) {
+        let skills = jobData[currentEnemy.job].skills.filter(s => currentEnemy.tier >= s.rank);
+        if(skills.length > 0) { sk = skills[Math.floor(Math.random()*skills.length)]; logAction = `[${sk.n}]`; currentEnemy.mp -= sk.mp || 0; }
+    }
+    
+    let rawDmg = Math.max(1, calcMemberDamage(currentEnemy, !!sk, sk ? sk.mult : 1.0) - tDef);
+    let variance = rawDmg * (0.8 + Math.random() * 0.4);
+    let isCrit = Math.random() < 0.1;
+    let eDmg = Math.floor(isCrit ? variance * 1.5 : variance);
+    let critText = isCrit ? ` <span style="color:#ff9800; font-weight:bold;">(크리티컬!)</span>` : "";
+    
     target.hp = Math.max(0, target.hp - eDmg); updateAllStats(); 
-    let log = `[적의 공격] ${target.name||target.job}에게 ${eDmg} 피해를 입혔다.`;
+    let log = `[적의 ${logAction}] ${target.name||target.job}에게 ${eDmg} 피해를 입혔다.${critText}`;
     renderCombatTurn(log, true);
     
     playShakeEffect(() => {
@@ -760,10 +837,9 @@ function executeEnemyTurn() {
             if(currentEnemy.isArena) {
                 currentEnemy = null; let pGain = 0, gGain = 0;
                 if(arenaState.round === 2) { pGain = 70; gGain = 2000 * player.rank; } else if(arenaState.round === 4) { pGain = 30; gGain = 1000 * player.rank; } else if(arenaState.round === 8) { pGain = 10; gGain = 500 * player.rank; }
-                player.prestige += pGain; player.gold += gGain;
-                let rText = arenaState.round === 2 ? "결승전" : `${arenaState.round}강`;
-                player.party.forEach(p => { let ts = p.isPlayer ? getTotalStats() : p; p.hp = ts.maxHp; p.mp = ts.maxMp; });
-                return showMessage(`[투기장 패배]<br>${rText}에서 파티장이 쓰러져 탈락했습니다.<br>위상 +${pGain}, 위로금 ${gGain}G 획득.`, renderTownUI);
+                player.prestige += pGain; player.gold += gGain; let rText = arenaState.round === 2 ? "결승전" : `${arenaState.round}강`;
+                player.party.forEach(p => { let ts = p.isPlayer ? getTotalStats() : p; p.hp = ts.maxHp; p.mp = ts.maxMp; }); updateAllStats();
+                return showMessage(`[투기장 패배]<br>${rText}에서 탈락했습니다.<br>${pGain>0 ? `위상 +${pGain}, 위로금 ${gGain}G 획득.` : '참가 보상이 없습니다.'}`, renderTownUI);
             }
             return fadeTransition(() => { returnToTown(true); });
         }
@@ -774,12 +850,25 @@ function executeEnemyTurn() {
 function executeWin(lastLog) {
     if (currentEnemy.isArena) {
         currentEnemy = null;
+        
+        // 💡 2. 투기장 타 경기 자동 시뮬레이션
+        let nextFighters = [];
+        for(let i=0; i<arenaState.fighters.length; i+=2) {
+            let f1 = arenaState.fighters[i]; let f2 = arenaState.fighters[i+1];
+            if (f1.isPlayer || f2.isPlayer) { nextFighters.push(f1.isPlayer ? f1 : f2); } 
+            else {
+                let f1WinProb = Math.max(0.1, Math.min(0.9, 0.5 + (f1.tier - f2.tier) * 0.1));
+                nextFighters.push(Math.random() < f1WinProb ? f1 : f2);
+            }
+        }
+        arenaState.fighters = nextFighters;
+        
         if(arenaState.round === 2) {
             player.prestige += 100; player.gold += 5000 * player.rank;
             let eq = generateEquip(player.rank + 2); player.equipList.push(eq);
-            showMessage(`🎉 <b>투기장 우승!</b> 🎉<br>위상 100, 골드 ${5000*player.rank}G, 장비 [${eq.name}] 획득!`, renderTownUI);
+            showMessage(`🎉 <b>투기장 최종 우승!</b> 🎉<br>모든 상대를 꺾었습니다!<br>위상 +100, 상금 ${5000*player.rank}G, 장비 [${eq.name}] 획득!`, renderTownUI);
         } else {
-            arenaState.round /= 2; showMessage(`승리했습니다! 다음 라운드로 진출합니다.`, nextArenaMatch);
+            arenaState.round /= 2; showMessage(`상대를 쓰러뜨렸습니다!<br>다음 라운드로 진출합니다.`, showBracketUI);
         }
         return;
     }
@@ -808,7 +897,6 @@ function executeWin(lastLog) {
     updateAllStats(); return showMessage(wLog, () => { currentEnemy = null; renderDungeonUI(); });
 }
 
-// 💡 13. 마을 복귀 보상
 function returnToTown(isGameOver) {
     player.inDungeon = false; currentEnemy = null;
     let kills = player.dungeonKills || 0; let reward = Math.floor(kills / 5) * 500;
@@ -827,7 +915,6 @@ function returnToTown(isGameOver) {
     let ts = getTotalStats(); player.party[0].hp = ts.maxHp; player.party[0].mp = ts.maxMp; saveGame(); showMessage(msg, renderTownUI);
 }
 
-// 💡 10. 상단 장비 슬롯 UI 랜더링
 function renderEquipSlots() {
     let html = '';
     equipTypes.forEach(type => {
@@ -854,7 +941,6 @@ function renderEquipSlots() {
 function openInventory(context) {
     const sceneText = document.getElementById('scene-text'); const actionArea = document.getElementById('action-area');
     document.getElementById('equip-ui-overlay').classList.remove('hidden'); renderEquipSlots();
-    
     let backFunc = context === 'town' ? 'renderTownUI()' : (context === 'combat' ? `document.getElementById('equip-ui-overlay').classList.add('hidden'); renderCombatTurn('가방을 닫았다.', false)` : 'renderDungeonUI()');
     
     let html = `<div style="display:flex; flex-direction:column; gap:8px;">
@@ -906,7 +992,6 @@ function executeDestroyEssence(idx) {
     closeModal(); player.equipped["정수"].splice(idx, 1); updateAllStats(); openInventory(player.inDungeon ? (currentEnemy ? 'combat' : 'dungeon') : 'town');
 }
 
-// 💡 9. 포션 대상 선택 UI
 function useItem(type, context) {
     if (player.items[type] <= 0) return showMessage("부족합니다!");
     if (type === 'food') { player.items.food--; player.hunger = 100; showMessage("식량 섭취! 허기가 100으로 회복되었습니다.", () => openInventory(context)); updateAllStats(); return; }
