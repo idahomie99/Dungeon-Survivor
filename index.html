@@ -43,7 +43,6 @@
             <span>DUNGEON SURVIVOR</span>
             <div style="display:flex; align-items:center; gap:10px;">
                 <button id="guide-btn" onclick="showDungeonGuide()">❓ 가이드</button>
-                <!-- 💡 2. 로비 복귀 버튼 (문 아이콘) -->
                 <button id="lobby-btn" onclick="confirmLobby()" style="background:transparent; border:none; cursor:pointer; font-size:20px; line-height:1;">🚪</button>
             </div>
         </header>
@@ -74,7 +73,10 @@
                 <div id="scene-text">마을 광장에 서 있습니다.</div>
                 
                 <div id="equip-ui-overlay" class="hidden">
-                    <div id="paper-doll"></div>
+                    <div id="paper-doll-container">
+                        <div id="paper-doll"></div>
+                        <div id="essence-slots" class="ess-container"></div>
+                    </div>
                 </div>
             </div>
 

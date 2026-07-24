@@ -19,21 +19,28 @@ body { background-color: #050505; display: flex; justify-content: center; align-
 
 #visual-area { flex: 3; display: flex; flex-direction: column; border-bottom: 1px solid #222; position: relative; overflow: hidden; background-color:#111; }
 #dungeon-bg { position: absolute; top:0; left:0; width:100%; height:100%; background-size: cover; background-position: center; opacity: 0.4; z-index: 1; transition: background-image 0.5s ease; }
-#scene-text { flex: 1; padding: 40px 20px 20px 20px; font-size: 13px; text-align: center; line-height: 1.6; color: #eee; z-index: 5; display:flex; flex-direction:column; justify-content:center; }
+#scene-text { flex: 1; padding: 40px 20px 20px 20px; font-size: 13px; text-align: center; line-height: 1.6; color: #eee; z-index: 5; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+
+/* 💡 추가된 플레이어 스탠딩 캐릭터용 CSS */
+#player-sprite { display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; }
+.player-img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0px 10px 5px rgba(0,0,0,0.8)); }
 
 #cp-toast { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); padding: 8px 16px; font-size: 18px; font-weight: bold; background: rgba(0,0,0,0.8); border: 2px solid; border-radius: 8px; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; text-shadow: 0 0 10px currentColor; }
 #cp-toast.show { opacity: 1; }
 
 #equip-ui-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(10,10,10,0.98); z-index:20; padding:15px; display:flex; flex-direction:column; align-items:center; overflow-y:auto;}
-#paper-doll { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-areas: "weap helm neck" "glov ches cape" "rin1 pant rin2" ". shoe ."; gap: 6px; width: 100%; max-width: 280px; position:relative; padding-top: 10px; background: url('image/silhouette.png') no-repeat center center; background-size: 70%; }
-.eq-slot { background:rgba(20,20,20,0.85); border:1px dashed #444; border-radius:6px; padding:6px 2px; text-align:center; font-size:10px; color:#666; cursor:pointer; display:flex; flex-direction:column; justify-content:center; gap:4px; transition:0.2s; word-break: keep-all; height: 48px; }
-.eq-slot:hover { background:rgba(40,40,40,0.95); border-color:#888; }
+#paper-doll-container { display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 10px; }
+#paper-doll { position: relative; width: 260px; height: 320px; background: url('image/silhouette.png') no-repeat center center; background-size: contain; margin-bottom: 10px; }
+.eq-slot { position: absolute; width: 48px; height: 48px; background:rgba(20,20,20,0.85); border:1px dashed #444; border-radius:6px; padding:4px 2px; text-align:center; font-size:9px; color:#666; cursor:pointer; display:flex; flex-direction:column; justify-content:center; gap:2px; transition:0.2s; word-break: keep-all; line-height: 1.1; overflow: hidden; }
+.eq-slot:hover { background:rgba(40,40,40,0.95); border-color:#888; z-index: 10; transform: scale(1.05); }
 .eq-slot.filled { border:1px solid #ffd54f; color:#eee; background:rgba(34,27,0,0.9); }
-.eq-slot.es-slot { border-style: dashed; border-color: #00e5ff; }
+.eq-slot.es-slot { position: static; border-style: dashed; border-color: #00e5ff; width: 60px; height: 60px; }
 .eq-slot.es-slot.filled { border-style: solid; border-color: #00e5ff; background:rgba(0,29,34,0.9); }
-.eq-slot-title { font-weight:bold; font-size:9px; opacity:0.8; }
-.ess-container { display: flex; gap: 8px; margin-top: 15px; width: 100%; max-width: 280px; justify-content: center; }
-.ess-container .eq-slot { width: 45%; }
+.eq-slot-title { font-weight:bold; font-size:10px; color:#aaa; margin-bottom: 2px; }
+.eq-slot.filled .eq-slot-title { color:#ffd54f; }
+.eq-slot.es-slot.filled .eq-slot-title { color:#00e5ff; }
+
+.ess-container { display: flex; gap: 15px; justify-content: center; width: 100%; margin-bottom: 20px; }
 
 #exp-hud { display: flex; align-items: center; padding: 8px 24px; gap: 8px; background: #0f0f0f; border-bottom: 1px solid #222; z-index:10; }
 .exp-bar-bg { flex: 1; height: 4px; background: #222; border-radius: 2px; overflow: hidden; }
@@ -77,9 +84,9 @@ body { background-color: #050505; display: flex; justify-content: center; align-
 .icon-btn:hover { background-color: #222; border-color: #666; color: #fff; }
 .icon-btn.auto-active { background-color: rgba(76, 175, 80, 0.2) !important; border-color: #4caf50 !important; color: #4caf50 !important; }
 
-/* 💡 9. 이벤트 탭 깜빡임 애니메이션 */
 .event-blink { animation: ev-blink 1.5s infinite; border-color: #ff9800 !important; color: #ff9800 !important; }
 @keyframes ev-blink { 0%, 100% { box-shadow: 0 0 5px #ff9800; } 50% { box-shadow: 0 0 15px #ff9800; } }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
 .icon-btn svg { width: 24px; height: 24px; margin-bottom: 6px; fill: currentColor; }
 .icon-btn span { font-size: 10px; font-weight: 600; text-align: center;}
